@@ -53,7 +53,8 @@ export function CampoVideo({ video, status, onChange, onEnviando }: CampoVideoPr
       setEnviando(true);
       onEnviando(true);
       const enviado = await enviarArquivo(arquivo);
-      setPrevia(URL.createObjectURL(arquivo));
+      // enviado.url já é a prévia local (blob:) do arquivo.
+      setPrevia(enviado.url);
       onChange({ caminho: enviado.caminho, url: enviado.url });
     } catch (erro) {
       toast.error(mensagemSeguraDeErro(erro, "Não foi possível enviar o vídeo."));

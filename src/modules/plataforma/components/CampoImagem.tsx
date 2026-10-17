@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { CircleNotchIcon, ImageIcon, XIcon } from "@phosphor-icons/react";
 
-import { comprimirImagem, enviarArquivo, type ArquivoEnviado } from "@/actions/uploadService";
+import { comprimirImagem, ehPreviaLocal, enviarArquivo, type ArquivoEnviado } from "@/actions/uploadService";
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 
 type CampoImagemProps = {
@@ -54,7 +54,7 @@ export function CampoImagem({ rotulo, dica, valor, formato, onChange, onEnviando
             <CircleNotchIcon size={24} className="animate-spin" aria-hidden />
           </span>
         ) : valor ? (
-          <Image src={valor.url} alt="" fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
+          <Image src={valor.url} alt="" fill sizes="(max-width: 768px) 100vw, 600px" unoptimized={ehPreviaLocal(valor.url)} className="object-cover" />
         ) : (
           <span className="absolute inset-0 flex flex-col items-center justify-center gap-1">
             <ImageIcon size={26} aria-hidden />

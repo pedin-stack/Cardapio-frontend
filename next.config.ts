@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
-// Imagens do cardápio vêm do Supabase Storage; o host sai da mesma variável do cliente.
+// Imagens do cardápio vêm do Supabase Storage (bucket privado: URLs assinadas em /object/sign); o host sai da
+// mesma variável do cliente.
 const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : undefined;
@@ -13,7 +14,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     remotePatterns: supabaseHost
-      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
+      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/sign/**" }]
       : [],
   },
   experimental: {

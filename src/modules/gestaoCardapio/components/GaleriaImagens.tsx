@@ -8,7 +8,7 @@ import { AnimatePresence, motion, Reorder } from "framer-motion";
 import { toast } from "react-toastify";
 import { CircleNotchIcon, ImageSquareIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 
-import { comprimirImagem, enviarArquivo } from "@/actions/uploadService";
+import { comprimirImagem, ehPreviaLocal, enviarArquivo } from "@/actions/uploadService";
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 
 import { MAXIMO_IMAGENS } from "../schemas/itemCardapio.schema";
@@ -74,7 +74,7 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
                   whileDrag={{ scale: 1.08, zIndex: 10, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.8)" }}
                   className="relative size-28 shrink-0 cursor-grab touch-pan-y overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 active:cursor-grabbing"
                 >
-                  <Image src={imagem.url} alt={`Foto ${i + 1}`} fill sizes="112px" className="pointer-events-none object-cover" />
+                  <Image src={imagem.url} alt={`Foto ${i + 1}`} fill sizes="112px" unoptimized={ehPreviaLocal(imagem.url)} className="pointer-events-none object-cover" />
                   {i === 0 && (
                     <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase backdrop-blur">
                       Capa

@@ -15,7 +15,6 @@ export type ArquivoEnviado = {
 type UploadAssinado = {
   caminho: string;
   token: string;
-  urlPublica: string;
 };
 
 /** Teto do vídeo original (o plano gratuito do Supabase limita 50 MB por arquivo). */
@@ -30,7 +29,15 @@ export async function enviarArquivo(arquivo: File): Promise<ArquivoEnviado> {
     .from(env.NEXT_PUBLIC_SUPABASE_BUCKET)
     .uploadToSignedUrl(data.caminho, data.token, arquivo, { contentType: arquivo.type });
   if (error) throw new Error("Falha ao enviar o arquivo. Tente novamente.");
-  return { caminho: data.caminho, url: data.urlPublica };
+  // Bucket privado: não há URL pública. A prévia usa o próprio arquivo (blob:); depois de salvo, a API devolve
+  // URLs assinadas. ponytail: o blob não é revogado (some ao recarregar a página); revogar se o painel ficar
+  // aberto o dia todo com centenas de uploads.
+  return { caminho: data.caminho, url: URL.createObjectURL(arquivo) };
+}
+
+/** Prévia local (blob:) não passa pelo otimizador de imagem do Next, que só aceita URL remota. */
+export function ehPreviaLocal(url: string): boolean {
+  return url.startsWith("blob:");
 }
 
 /** Reduz a foto para WebP ≤ 1600 px (~800 KB): o feed carrega rápido em 4G. */
