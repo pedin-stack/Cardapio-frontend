@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/*
+ * Tokens do Cardápio — dark mode único (minimal UI + glassmorphism).
+ * Consumo: sintaxe v4 `bg-(--bg)`, `text-(--texto-suave)`, `border-(--borda)`.
+ */
+:root {
+  --bg: #07070a;
+  --bg-elevado: #111117;
+  --superficie: rgb(255 255 255 / 0.06);
+  --superficie-forte: rgb(255 255 255 / 0.1);
+  --borda: rgb(255 255 255 / 0.1);
+  --borda-forte: rgb(255 255 255 / 0.18);
+  --texto: #f5f5f7;
+  --texto-suave: rgb(245 245 247 / 0.66);
+  --texto-fraco: rgb(245 245 247 / 0.42);
+  --destaque: #ff6b4a;
+  --destaque-2: #ffb36b;
+  --destaque-suave: rgb(255 107 74 / 0.16);
+  --sucesso: #3ddc97;
+  --perigo: #ff5470;
+  --aviso: #ffc861;
+  --raio: 1.25rem;
+  color-scheme: dark;
+}
+
+/* `inline`: o utilitário recebe o var() literal e resolve no elemento — as variáveis do next/font vivem na div
+   raiz do _app, não no :root (sem inline o var() quebrava no :root e a fonte caía para a do sistema). */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
+  --ease-mola: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--texto);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+body {
+  @apply font-sans antialiased;
+}
+
+::selection {
+  background: var(--destaque);
+  color: #fff;
+}
+
+/* Vidro fosco: superfícies sobre mídia (chips, barras, sheets). */
+@utility vidro {
+  background: rgb(16 16 22 / 0.55);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid var(--borda);
+}
+
+@utility vidro-claro {
+  background: rgb(255 255 255 / 0.08);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid var(--borda-forte);
+}
+
+@utility gradiente-destaque {
+  background-image: linear-gradient(135deg, var(--destaque), var(--destaque-2));
+}
+
+@utility texto-gradiente {
+  background-image: linear-gradient(135deg, #fff 30%, var(--destaque-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility sem-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Skeleton com brilho deslizante. */
+@utility shimmer {
+  background: linear-gradient(100deg, var(--superficie) 30%, var(--superficie-forte) 50%, var(--superficie) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* Toasts no tema escuro de vidro. */
+.Toastify__toast {
+  background: rgb(20 20 26 / 0.85) !important;
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--borda);
+  border-radius: 1rem !important;
+  color: var(--texto) !important;
+  font-family: var(--font-inter), sans-serif;
+}
