@@ -15,9 +15,11 @@ npm run check && npm run lint && npm test && npm run build
 ## Deploy (Vercel)
 
 Variáveis do projeto na Vercel: `API_ORIGEM` (ex.: `https://cardapio-api.169-58-57-18.sslip.io`),
-`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_KEY` (anon) e `NEXT_PUBLIC_SUPABASE_BUCKET`.
-O navegador chama `/api/*` no próprio domínio da Vercel e o rewrite do `next.config.ts` repassa à API: o cookie de
-sessão fica no domínio do front. Na API, `CORS_ALLOWED_ORIGINS` deve conter a URL da Vercel (o rewrite repassa o `Origin`).
+`API_SEGREDO_FRONT` (o mesmo `FRONT_SEGREDO` da API), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_KEY` (anon)
+e `NEXT_PUBLIC_SUPABASE_BUCKET`.
+O navegador chama `/api/*` no próprio domínio da Vercel e o `src/middleware.ts` repassa à API com o segredo
+`X-Cardapio-Front` — sem ele a API responde 403. O cookie de sessão fica no domínio do front. Na API,
+`CORS_ALLOWED_ORIGINS` deve conter a URL da Vercel (o middleware repassa o `Origin`).
 
 ## Instâncias
 
