@@ -4,12 +4,10 @@
 import axios from "axios";
 
 import { limparMarcadorSessao, temMarcadorSessao } from "@/auth/sessionCookies";
-import { env } from "@/config/env";
 import { obterDispositivoId } from "@/utils/dispositivo";
 
+// Mesma origem: /api/* é repassado à API pelo rewrite do next.config (o cookie de sessão fica neste domínio).
 export const api = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_BASE_URL,
-  // O JWT é cookie HttpOnly: o navegador só o envia cross-origin com credenciais.
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });

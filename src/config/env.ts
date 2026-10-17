@@ -4,8 +4,8 @@
  */
 
 // Acesso literal (process.env.X) é obrigatório: o Next só substitui referências estáticas no build.
+// (A URL da API não está aqui: é API_ORIGEM, só do servidor, usada pelo rewrite do next.config.)
 const valores = {
-  NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_KEY: process.env.NEXT_PUBLIC_SUPABASE_KEY,
   NEXT_PUBLIC_SUPABASE_BUCKET: process.env.NEXT_PUBLIC_SUPABASE_BUCKET,
