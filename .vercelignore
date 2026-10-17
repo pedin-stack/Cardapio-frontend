@@ -1,0 +1,6 @@
+# O deploy pela CLI envia a pasta local: nunca mandar env locais (as variáveis de produção ficam na Vercel).
+.env*
+!.env.example
+node_modules
+.next
+tests

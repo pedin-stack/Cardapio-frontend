@@ -23,3 +23,6 @@ next-env.d.ts
 
 # debug
 npm-debug.log*
+
+# vercel (link do projeto + token OIDC baixado no .env.local)
+.vercel
