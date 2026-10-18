@@ -65,7 +65,9 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
     setPuxando(null);
     if (!inicio || !onDeslizarAlem) return;
     const direcao = destinoDo(inicio, e.changedTouches[0]);
-    if (direcao && Math.abs(e.changedTouches[0].clientX - inicio.x) >= LIMIAR_DESLIZE) onDeslizarAlem(direcao);
+    // Troca depois que o navegador fecha o gesto: trocar já no touchend tira este carrossel do DOM no meio do
+    // gesto e o Chrome trata o deslize para a direita como "voltar" (ignorando o overscroll-behavior da página).
+    if (direcao && Math.abs(e.changedTouches[0].clientX - inicio.x) >= LIMIAR_DESLIZE) setTimeout(() => onDeslizarAlem(direcao), 120);
   };
 
   const aoRolar = () => {
