@@ -24,11 +24,13 @@ import { ItemFeedCard } from "../components/ItemFeedCard";
 import { useCardapioPublico } from "../hooks/useCardapioPublico";
 import { useCurtidos } from "../hooks/useCurtidos";
 import { useRastreioVisualizacao } from "../hooks/useRastreioVisualizacao";
-import type { ItemPublico } from "../types/cardapioPublico";
+import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
 import { categoriaVizinha } from "../utils/categoriaVizinha";
 
 /** Índice "virtual" do hero no feed: nenhum card ativo. */
 const INDICE_HERO = -1;
+/** Categoria virtual com os mais curtidos (a API manda os ids já ordenados). */
+const MAIS_PEDIDOS: CategoriaPublica = { id: "mais-pedidos", nome: "Mais pedidos", ordem: -1 };
 
 export default function CardapioPublicoPage() {
   const router = useRouter();
@@ -46,12 +48,21 @@ export default function CardapioPublicoPage() {
   const feed = useRef<HTMLElement>(null);
   const secoes = useRef(new Map<number, HTMLElement>());
 
-  const categoria = categoriaEscolhida ?? cardapio?.categorias[0]?.id ?? null;
-  // Sem categorias no restaurante, o feed mostra tudo.
-  const itens = useMemo(
-    () => (cardapio?.itens ?? []).filter((item) => !categoria || item.categoriaIds.includes(categoria)),
-    [cardapio, categoria],
+  // "Mais pedidos" só existe quando há curtidas; vem antes das categorias reais (é onde o feed abre).
+  const categoriasFeed = useMemo(
+    () => (cardapio?.maisPedidos.length ? [MAIS_PEDIDOS, ...cardapio.categorias] : (cardapio?.categorias ?? [])),
+    [cardapio],
   );
+  const categoria = categoriaEscolhida ?? categoriasFeed[0]?.id ?? null;
+  // Sem categorias no restaurante, o feed mostra tudo.
+  const itens = useMemo(() => {
+    const todos = cardapio?.itens ?? [];
+    if (categoria === MAIS_PEDIDOS.id) {
+      const porId = new Map(todos.map((item) => [item.id, item]));
+      return (cardapio?.maisPedidos ?? []).map((id) => porId.get(id)).filter((item): item is ItemPublico => Boolean(item));
+    }
+    return todos.filter((item) => !categoria || item.categoriaIds.includes(categoria));
+  }, [cardapio, categoria]);
   const nomeCategoria = useMemo(
     () => new Map((cardapio?.categorias ?? []).map((c) => [c.id, c.nome])),
     [cardapio],
@@ -107,14 +118,14 @@ export default function CardapioPublicoPage() {
 
   const vizinhas = useMemo(
     () => ({
-      proxima: categoriaVizinha(cardapio?.categorias ?? [], categoria, 1)?.nome,
-      anterior: categoriaVizinha(cardapio?.categorias ?? [], categoria, -1)?.nome,
+      proxima: categoriaVizinha(categoriasFeed, categoria, 1)?.nome,
+      anterior: categoriaVizinha(categoriasFeed, categoria, -1)?.nome,
     }),
-    [cardapio, categoria],
+    [categoriasFeed, categoria],
   );
 
   const deslizarParaCategoria = (direcao: 1 | -1) => {
-    const destino = categoriaVizinha(cardapio?.categorias ?? [], categoria, direcao);
+    const destino = categoriaVizinha(categoriasFeed, categoria, direcao);
     if (destino) trocarCategoria(destino.id);
   };
 
@@ -146,9 +157,9 @@ export default function CardapioPublicoPage() {
       <div className="min-h-svh bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--destaque)_12%,transparent),transparent_60%)]">
         <div className="relative mx-auto max-w-[480px] md:shadow-[0_0_120px_-20px_color-mix(in_srgb,var(--destaque)_25%,transparent)]">
           <div className="pointer-events-none fixed inset-x-0 top-0 z-20 mx-auto max-w-[480px]">
-            {cardapio.categorias.length > 0 && (
+            {categoriasFeed.length > 0 && (
               <ChipsCategorias
-                categorias={cardapio.categorias}
+                categorias={categoriasFeed}
                 selecionada={categoria}
                 onSelecionar={trocarCategoria}
                 visivel={indiceAtivo !== INDICE_HERO && aba === "cardapio"}

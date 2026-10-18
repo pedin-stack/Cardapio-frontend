@@ -42,6 +42,8 @@ export type CardapioPublico = {
   restaurante: RestaurantePublico;
   categorias: CategoriaPublica[];
   itens: ItemPublico[];
+  /** "Mais pedidos": ids dos mais curtidos, do mais curtido para o menos (vazio = sem curtidas ainda). */
+  maisPedidos: string[];
 };
 
 /** Espelho de `VisualizacoesRequestDTO.VisualizacaoItem`. */
