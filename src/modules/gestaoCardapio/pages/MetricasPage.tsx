@@ -188,7 +188,7 @@ function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: st
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="vidro absolute inset-x-0 z-20 mt-2 max-h-80 origin-top overflow-y-auto rounded-2xl p-1.5 shadow-2xl shadow-black/50 outline-none"
+            className="absolute inset-x-0 border border-(--borda) bg-(--bg-elevado) z-20 mt-2 max-h-80 origin-top overflow-y-auto rounded-2xl p-1.5 shadow-2xl shadow-black/50 outline-none"
           >
             {opcoes.map((opcao, indice) => (
               <li
