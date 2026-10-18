@@ -25,7 +25,7 @@ O navegador chama `/api/*` no próprio domínio da Vercel e o `src/middleware.ts
 
 | Rota | Quem | O quê |
 |---|---|---|
-| `/{slug}` | cliente (sem login) | hero → feed vertical um-prato-por-tela (deslizar além da última foto troca de categoria), curtir (toque no coração ou dois toques na foto), aba Explorar (mosaico + busca), aba Curtidos (o "carrinho", com quantidade e especificações escolhidas) |
+| `/{slug}` | cliente (sem login) | hero → feed vertical um-prato-por-tela, uma categoria por vez (abre na primeira; deslizar além da última foto troca de categoria), curtir (toque no coração ou dois toques na foto), aba Explorar (mosaico + busca), aba Curtidos (o "carrinho", com quantidade e especificações escolhidas) |
 | `/login` | gestor / super admin | entra e vai para a área do perfil |
 | `/painel` · `/painel/categorias` · `/painel/metricas` · `/painel/restaurante` | gestor | itens (até 8 fotos + 1 vídeo, especificações), categorias, métricas, cor do cardápio |
 | `/plataforma` | super admin | restaurantes: cadastrar (com o gestor e a cor), ativar/desativar, editar |

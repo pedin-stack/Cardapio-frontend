@@ -1,27 +1,12 @@
 /**
- * @description Para onde o feed vai quando o cliente desliza além da última (ou antes da primeira) foto do prato.
- * Base = categoria selecionada; em "Tudo", a primeira categoria do prato na ordem do cardápio.
+ * @description Para onde o feed vai quando o cliente desliza além da última (ou antes da primeira) foto do prato:
+ * a categoria seguinte (ou a anterior) na ordem do cardápio. O feed sempre mostra uma categoria; o cardápio
+ * inteiro fica na aba Explorar.
  */
-import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
+import type { CategoriaPublica } from "../types/cardapioPublico";
 
-/** `null` = "Tudo"; `undefined` = não há para onde ir. */
-export type Destino = CategoriaPublica | null | undefined;
-
-export function categoriaVizinha(
-  categorias: CategoriaPublica[],
-  selecionada: string | null,
-  item: ItemPublico,
-  direcao: 1 | -1,
-): Destino {
-  const base = selecionada
-    ? categorias.findIndex((c) => c.id === selecionada)
-    : categorias.findIndex((c) => item.categoriaIds.includes(c.id));
-
-  if (direcao === 1) {
-    // Prato sem categoria em "Tudo": segue para a primeira.
-    return categorias[base + 1];
-  }
-  if (base > 0) return categorias[base - 1];
-  // Antes da primeira categoria só existe o "Tudo", e só faz sentido se há filtro.
-  return base === 0 && selecionada ? null : undefined;
+/** `undefined` = não há para onde ir (pontas, ou restaurante sem categorias). */
+export function categoriaVizinha(categorias: CategoriaPublica[], atual: string | null, direcao: 1 | -1): CategoriaPublica | undefined {
+  const indice = categorias.findIndex((c) => c.id === atual);
+  return indice < 0 ? undefined : categorias[indice + direcao];
 }

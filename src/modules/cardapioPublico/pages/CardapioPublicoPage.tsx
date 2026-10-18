@@ -36,7 +36,8 @@ export default function CardapioPublicoPage() {
   const { cardapio, loading, indisponivel, erro, refetch } = useCardapioPublico(slug);
   const { curtidos, alternar, isCurtido, quantidade, escolhas, definirQuantidade, escolher } = useCurtidos(slug);
 
-  const [categoria, setCategoria] = useState<string | null>(null);
+  /** Categoria escolhida nos chips; antes de escolher, a primeira do cardápio (não há "Tudo" no feed). */
+  const [categoriaEscolhida, setCategoriaEscolhida] = useState<string | null>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(INDICE_HERO);
   const [aba, setAba] = useState<Aba>("cardapio");
   const [detalhe, setDetalhe] = useState<ItemPublico | null>(null);
@@ -45,6 +46,8 @@ export default function CardapioPublicoPage() {
   const feed = useRef<HTMLElement>(null);
   const secoes = useRef(new Map<number, HTMLElement>());
 
+  const categoria = categoriaEscolhida ?? cardapio?.categorias[0]?.id ?? null;
+  // Sem categorias no restaurante, o feed mostra tudo.
   const itens = useMemo(
     () => (cardapio?.itens ?? []).filter((item) => !categoria || item.categoriaIds.includes(categoria)),
     [cardapio, categoria],
@@ -86,8 +89,8 @@ export default function CardapioPublicoPage() {
     secoes.current.get(0)?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const trocarCategoria = (id: string | null) => {
-    setCategoria(id);
+  const trocarCategoria = (id: string) => {
+    setCategoriaEscolhida(id);
     // Depois do re-render do feed filtrado, leva ao primeiro prato da categoria.
     requestAnimationFrame(() => secoes.current.get(0)?.scrollIntoView({ behavior: "smooth" }));
   };
@@ -102,22 +105,17 @@ export default function CardapioPublicoPage() {
     return () => variaveis.forEach(([nome]) => estilo.removeProperty(nome));
   }, [corDestaque]);
 
-  const vizinhasDe = useCallback(
-    (item: ItemPublico) => {
-      const lista = cardapio?.categorias ?? [];
-      const proxima = categoriaVizinha(lista, categoria, item, 1);
-      const anterior = categoriaVizinha(lista, categoria, item, -1);
-      return {
-        proxima: proxima?.nome,
-        anterior: anterior === null ? "Tudo" : anterior?.nome,
-      };
-    },
+  const vizinhas = useMemo(
+    () => ({
+      proxima: categoriaVizinha(cardapio?.categorias ?? [], categoria, 1)?.nome,
+      anterior: categoriaVizinha(cardapio?.categorias ?? [], categoria, -1)?.nome,
+    }),
     [cardapio, categoria],
   );
 
-  const deslizarParaCategoria = (item: ItemPublico, direcao: 1 | -1) => {
-    const destino = categoriaVizinha(cardapio?.categorias ?? [], categoria, item, direcao);
-    if (destino !== undefined) trocarCategoria(destino?.id ?? null);
+  const deslizarParaCategoria = (direcao: 1 | -1) => {
+    const destino = categoriaVizinha(cardapio?.categorias ?? [], categoria, direcao);
+    if (destino) trocarCategoria(destino.id);
   };
 
   const pausarVideos = Boolean(detalhe) || aba !== "cardapio";
@@ -193,8 +191,8 @@ export default function CardapioPublicoPage() {
                   onAlternarCurtida={() => alternar(item.id)}
                   onAbrirDetalhe={() => setDetalhe(item)}
                   onAlternarSom={() => setMudo((m) => !m)}
-                  vizinhas={vizinhasDe(item)}
-                  onDeslizarAlem={(direcao) => deslizarParaCategoria(item, direcao)}
+                  vizinhas={vizinhas}
+                  onDeslizarAlem={deslizarParaCategoria}
                 />
               ))
             )}
