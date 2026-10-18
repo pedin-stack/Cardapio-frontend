@@ -52,7 +52,7 @@ export default function CategoriasPage() {
           evento.preventDefault();
           adicionar();
         }}
-        className="mb-5 flex gap-2"
+        className="mb-5 flex gap-2 lg:max-w-2xl"
       >
         <input
           value={nova}
@@ -80,7 +80,7 @@ export default function CategoriasPage() {
       ) : ordem.length === 0 ? (
         <EmptyState icone={<TagIcon size={44} weight="duotone" aria-hidden />} titulo="Nenhuma categoria" descricao="Crie categorias como Cafés, Doces ou Bebidas." />
       ) : (
-        <Reorder.Group axis="y" values={ordem} onReorder={setOrdem} className="flex flex-col gap-2">
+        <Reorder.Group axis="y" values={ordem} onReorder={setOrdem} className="flex flex-col gap-2 lg:max-w-2xl">
           <AnimatePresence initial={false}>
             {ordem.map((categoria) => (
               <Reorder.Item

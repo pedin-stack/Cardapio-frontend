@@ -1,6 +1,7 @@
 /**
  * @description Casca dos painéis (gestor e plataforma), mobile-first: cabeçalho de vidro com saída e
- * barra de abas inferior com indicador deslizante. Promovido para `components` porque dois módulos usam.
+ * barra de abas inferior com indicador deslizante. No notebook/PC (`lg`) a barra vira menu lateral e o
+ * conteúdo alarga para as métricas caberem lado a lado. Promovido para `components` porque dois módulos usam.
  */
 import type { ReactNode } from "react";
 import Head from "next/head";
@@ -31,15 +32,16 @@ export function PainelShell({ titulo, subtitulo, abas, acoes, children }: Painel
   const abaAtiva = abas
     .filter((aba) => router.pathname === aba.href || router.pathname.startsWith(`${aba.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0];
+  const comAbas = abas.length > 1;
 
   return (
-    <div className="min-h-svh bg-[radial-gradient(circle_at_80%_-10%,rgba(255,107,74,0.14),transparent_45%)]">
+    <div className={`min-h-svh bg-[radial-gradient(circle_at_80%_-10%,rgba(255,107,74,0.14),transparent_45%)] ${comAbas ? "lg:pl-60" : ""}`}>
       <Head>
         <title>{`${titulo} · Painel`}</title>
       </Head>
 
       <header className="sticky top-0 z-30 border-b border-white/5 bg-(--bg)/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3 lg:max-w-6xl lg:px-8">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-(--texto-fraco)">{usuario?.restauranteNome ?? "Plataforma"}</p>
             <h1 className="truncate font-display text-xl font-semibold">{titulo}</h1>
@@ -61,17 +63,18 @@ export function PainelShell({ titulo, subtitulo, abas, acoes, children }: Painel
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="mx-auto max-w-3xl px-4 pt-5 pb-36"
+        className="mx-auto max-w-3xl px-4 pt-5 pb-36 lg:max-w-6xl lg:px-8 lg:pt-8 lg:pb-16"
       >
         {subtitulo && <p className="mb-5 text-sm text-(--texto-suave)">{subtitulo}</p>}
         {children}
       </motion.main>
 
-      {abas.length > 1 && (
+      {comAbas && (
         <nav
           aria-label="Seções do painel"
-          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 mx-auto flex w-[calc(100%-2rem)] max-w-md gap-1 rounded-full vidro p-1.5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+          className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 mx-auto flex w-[calc(100%-2rem)] max-w-md gap-1 rounded-full vidro p-1.5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)] lg:top-0 lg:right-auto lg:bottom-0 lg:mx-0 lg:w-60 lg:max-w-none lg:flex-col lg:rounded-none lg:border-y-0 lg:border-l-0 lg:px-3 lg:py-6 lg:shadow-none"
         >
+          <span className="hidden px-3 pb-6 font-display text-lg font-semibold texto-gradiente lg:block">Cardápio</span>
           {abas.map((aba) => {
             const ativa = aba === abaAtiva;
             return (
@@ -79,12 +82,12 @@ export function PainelShell({ titulo, subtitulo, abas, acoes, children }: Painel
                 key={aba.href}
                 href={aba.href}
                 aria-current={ativa ? "page" : undefined}
-                className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-full py-2 text-[11px] font-semibold transition-colors ${ativa ? "text-white" : "text-white/55"}`}
+                className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-full py-2 text-[11px] font-semibold transition-colors lg:flex-none lg:flex-row lg:gap-3 lg:rounded-2xl lg:px-3 lg:py-2.5 lg:text-sm ${ativa ? "text-white" : "text-white/55 lg:hover:text-white"}`}
               >
                 {ativa && (
                   <motion.span
                     layoutId="painel-aba"
-                    className="absolute inset-0 rounded-full bg-white/12 ring-1 ring-white/15"
+                    className="absolute inset-0 rounded-full bg-white/12 ring-1 ring-white/15 lg:rounded-2xl"
                     transition={{ type: "spring", stiffness: 400, damping: 34 }}
                   />
                 )}

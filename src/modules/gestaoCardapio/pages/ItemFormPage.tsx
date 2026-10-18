@@ -139,8 +139,15 @@ export default function ItemFormPage() {
       ) : id && erro ? (
         <ErrorState mensagem={erro} onRetry={() => refetch()} />
       ) : (
-        <form onSubmit={handleSubmit(aoSalvar)} noValidate className="flex flex-col gap-6">
-          <motion.section custom={0} variants={secao} initial="oculto" animate="visivel" className="flex flex-col gap-5 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8">
+        // Notebook/PC: mídia fixa na coluna da esquerda, campos na da direita.
+        <form onSubmit={handleSubmit(aoSalvar)} noValidate className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
+          <motion.section
+            custom={0}
+            variants={secao}
+            initial="oculto"
+            animate="visivel"
+            className="flex flex-col gap-5 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8 lg:sticky lg:top-24 lg:row-span-2"
+          >
             <Controller
               control={control}
               name="imagens"
@@ -222,7 +229,7 @@ export default function ItemFormPage() {
             />
           </motion.section>
 
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between lg:col-span-2">
             {id ? (
               <Botao variante="perigo" icone={<TrashIcon size={16} weight="bold" aria-hidden />} onClick={() => setConfirmarExclusao(true)}>
                 Excluir

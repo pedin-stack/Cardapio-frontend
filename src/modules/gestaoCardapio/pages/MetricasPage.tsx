@@ -73,15 +73,15 @@ export default function MetricasPage() {
       ) : erro || !metricas ? (
         <ErrorState mensagem={erro ?? "Não foi possível carregar as métricas."} onRetry={() => refetch()} />
       ) : (
-        <div className={`flex flex-col gap-4 transition-opacity duration-300 ${atualizando ? "opacity-60" : "opacity-100"}`}>
-          <div className="grid grid-cols-2 gap-3">
+        <div className={`grid gap-4 transition-opacity duration-300 lg:grid-cols-2 ${atualizando ? "opacity-60" : "opacity-100"}`}>
+          <div className="grid grid-cols-2 gap-3 lg:col-span-2 lg:grid-cols-4">
             <Tile indice={0} icone={<HeartIcon weight="fill" aria-hidden />} rotulo="Curtidas (pedidos)" valor={formatarContagem(metricas.resumo.curtidas)} />
             <Tile indice={1} icone={<HeartBreakIcon weight="fill" aria-hidden />} rotulo="Quase pedidos" valor={formatarContagem(metricas.resumo.quasePedidos)} />
             <Tile indice={2} icone={<EyeIcon weight="fill" aria-hidden />} rotulo="Visualizações" valor={formatarContagem(metricas.resumo.visualizacoes)} />
             <Tile indice={3} icone={<ClockIcon weight="fill" aria-hidden />} rotulo="Tempo de tela" valor={formatarDuracao(metricas.resumo.tempoTotalMs)} />
           </div>
 
-          <Cartao indice={4} titulo="Dias e horários mais pedidos" subtitulo={itemId ? "Curtidas do item selecionado" : "Curtidas de todos os itens"}>
+          <Cartao indice={4} largo titulo="Dias e horários mais pedidos" subtitulo={itemId ? "Curtidas do item selecionado" : "Curtidas de todos os itens"}>
             <MapaCalorHorarios dados={metricas.curtidasPorHorario} />
           </Cartao>
 
@@ -103,7 +103,7 @@ export default function MetricasPage() {
             />
           </Cartao>
 
-          <Cartao indice={7} titulo="Tempo de atenção por item" subtitulo="Tempo médio com o prato na tela, por visualização">
+          <Cartao indice={7} largo titulo="Tempo de atenção por item" subtitulo="Tempo médio com o prato na tela, por visualização">
             <BarrasRanking
               cor="var(--destaque)"
               destaqueId={itemId}
@@ -141,9 +141,16 @@ function Tile({ indice, icone, rotulo, valor }: { indice: number; icone: ReactNo
   );
 }
 
-function Cartao({ indice, titulo, subtitulo, children }: { indice: number; titulo: string; subtitulo: string; children: ReactNode }) {
+/** `largo`: ocupa as duas colunas no notebook/PC. */
+function Cartao({ indice, largo, titulo, subtitulo, children }: { indice: number; largo?: boolean; titulo: string; subtitulo: string; children: ReactNode }) {
   return (
-    <motion.section custom={indice} variants={surgir} initial="oculto" animate="visivel" className="rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/8">
+    <motion.section
+      custom={indice}
+      variants={surgir}
+      initial="oculto"
+      animate="visivel"
+      className={`rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/8 ${largo ? "lg:col-span-2" : ""}`}
+    >
       <h2 className="font-display text-base font-semibold">{titulo}</h2>
       <p className="mb-4 text-xs text-(--texto-fraco)">{subtitulo}</p>
       {children}

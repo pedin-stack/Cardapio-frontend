@@ -52,7 +52,7 @@ export default function ItensPage() {
           }
         />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {itens.map((item, i) => {
             const capa = item.imagens[0]?.url ?? item.video.posterUrl;
             return (
@@ -99,7 +99,7 @@ export default function ItensPage() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 18 }}
-        className="fixed right-5 bottom-[calc(env(safe-area-inset-bottom)+6.5rem)] z-30"
+        className="fixed right-5 bottom-[calc(env(safe-area-inset-bottom)+6.5rem)] z-30 lg:right-8 lg:bottom-8"
       >
         <Link
           href="/painel/itens/novo"

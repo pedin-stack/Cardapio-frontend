@@ -140,7 +140,8 @@ export default function RestauranteFormPage() {
           noValidate
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-6"
+          // Notebook/PC: imagens e gestor à esquerda, dados do cardápio à direita.
+          className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8"
         >
           <section className="flex flex-col gap-4 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8">
             <Controller
@@ -159,7 +160,7 @@ export default function RestauranteFormPage() {
             />
           </section>
 
-          <section className="flex flex-col gap-4">
+          <section className="flex flex-col gap-4 lg:row-span-2">
             <InputField label="Nome do restaurante" erro={errors.nome?.message} {...register("nome")} />
             <InputField
               label="Endereço do cardápio"
@@ -198,7 +199,7 @@ export default function RestauranteFormPage() {
             />
           </section>
 
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between lg:col-span-2">
             {id ? (
               <Botao variante="perigo" icone={<TrashIcon size={16} weight="bold" aria-hidden />} onClick={() => setConfirmarExclusao(true)}>
                 Excluir

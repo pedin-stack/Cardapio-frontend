@@ -29,7 +29,7 @@ export default function RestaurantesPage() {
 
   return (
     <PainelShell titulo="Restaurantes" abas={ABAS_PLATAFORMA}>
-      <label className="mb-5 flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-(--destaque)/70">
+      <label className="mb-5 flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-(--destaque)/70 lg:max-w-md">
         <MagnifyingGlassIcon size={18} className="text-(--texto-fraco)" aria-hidden />
         <input
           value={busca}
@@ -51,7 +51,7 @@ export default function RestaurantesPage() {
           descricao={busca ? "Tente outro nome." : "Cadastre o primeiro restaurante e o seu gestor."}
         />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence initial={false}>
             {restaurantes.map((restaurante, i) => (
               <motion.li
@@ -128,7 +128,7 @@ export default function RestaurantesPage() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 18 }}
-        className="fixed right-5 bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] z-30"
+        className="fixed right-5 bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] z-30 lg:right-8 lg:bottom-8"
       >
         <Link
           href="/plataforma/restaurantes/novo"
