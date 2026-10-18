@@ -40,6 +40,9 @@ body {
   color: var(--texto);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+  /* Sem isso, deslizar para a direita num prato de uma foto só vira o "voltar" do navegador e tira o cliente
+     do cardápio (o deslize lateral troca de categoria). */
+  overscroll-behavior-x: none;
 }
 
 body {
