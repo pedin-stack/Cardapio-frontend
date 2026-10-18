@@ -65,9 +65,7 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
     setPuxando(null);
     if (!inicio || !onDeslizarAlem) return;
     const direcao = destinoDo(inicio, e.changedTouches[0]);
-    // Troca depois que o navegador fecha o gesto: trocar já no touchend tira este carrossel do DOM no meio do
-    // gesto e o Chrome trata o deslize para a direita como "voltar" (ignorando o overscroll-behavior da página).
-    if (direcao && Math.abs(e.changedTouches[0].clientX - inicio.x) >= LIMIAR_DESLIZE) setTimeout(() => onDeslizarAlem(direcao), 120);
+    if (direcao && Math.abs(e.changedTouches[0].clientX - inicio.x) >= LIMIAR_DESLIZE) onDeslizarAlem(direcao);
   };
 
   const aoRolar = () => {
@@ -93,6 +91,10 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
         onTouchMove={aoMoverToque}
         onTouchEnd={aoSoltarToque}
         onTouchCancel={() => setPuxando(null)}
+        // Nas pontas, o deslize para fora do carrossel não é rolagem do navegador (só o nosso toque): senão o Chrome
+        // o trata como "voltar"/"avançar" no histórico e tira o cliente do cardápio. pan-right = dedo para a esquerda.
+        // Safari não tem pan-left/right: o valor é ignorado e vale o touch-manipulation da classe.
+        style={{ touchAction: total <= 1 ? "pan-y" : slide === 0 ? "pan-right pan-y" : slide === total - 1 ? "pan-left pan-y" : "pan-x pan-y" }}
         className="sem-scrollbar flex size-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain touch-manipulation"
       >
         {temVideo && (
