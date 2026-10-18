@@ -1,5 +1,5 @@
 /**
- * @description Detalhe do prato: galeria, descrição completa, ingredientes e curtir.
+ * @description Detalhe do prato: galeria, descrição completa, especificações (uma opção por grupo), ingredientes e curtir.
  */
 import { motion } from "framer-motion";
 
@@ -15,6 +15,9 @@ type DetalheItemSheetProps = {
   curtido: boolean;
   nomesCategorias: string[];
   mudo: boolean;
+  /** Grupo → opção escolhida (vai para a aba Curtidos). */
+  escolhas: Record<string, string>;
+  onEscolher: (grupo: string, opcao: string) => void;
   onAlternarCurtida: () => void;
   onClose: () => void;
 };
@@ -24,7 +27,7 @@ const aparecer = {
   visivel: (i: number) => ({ opacity: 1, y: 0, transition: { delay: 0.12 + i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } }),
 };
 
-export function DetalheItemSheet({ item, curtido, nomesCategorias, mudo, onAlternarCurtida, onClose }: DetalheItemSheetProps) {
+export function DetalheItemSheet({ item, curtido, nomesCategorias, mudo, escolhas, onEscolher, onAlternarCurtida, onClose }: DetalheItemSheetProps) {
   return (
     <BottomSheet isOpen={Boolean(item)} onClose={onClose} titulo={item?.nome ?? "Detalhes"} tituloOculto>
       {item && (
@@ -50,8 +53,42 @@ export function DetalheItemSheet({ item, curtido, nomesCategorias, mudo, onAlter
             </motion.p>
           )}
 
+          {item.especificacoes.length > 0 && (
+            <motion.section custom={2} variants={aparecer} initial="oculto" animate="visivel" className="flex flex-col gap-4">
+              <h4 className="text-xs font-semibold tracking-wider text-(--texto-fraco) uppercase">Personalize</h4>
+              {item.especificacoes.map((especificacao) => (
+                <fieldset key={especificacao.nome} className="flex flex-col gap-2">
+                  <legend className="mb-2 text-sm font-semibold">{especificacao.nome}</legend>
+                  <div className="flex flex-wrap gap-2">
+                    {especificacao.opcoes.map((opcao) => {
+                      const marcada = escolhas[especificacao.nome] === opcao;
+                      return (
+                        <label
+                          key={opcao}
+                          className={`flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-2 text-sm ring-1 transition-colors has-focus-visible:ring-2 has-focus-visible:ring-(--destaque) ${
+                            marcada ? "bg-(--destaque-suave) ring-(--destaque)" : "bg-white/6 ring-white/12"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`${item.id}:${especificacao.nome}`}
+                            value={opcao}
+                            checked={marcada}
+                            onChange={() => onEscolher(especificacao.nome, opcao)}
+                            className="size-4 accent-(--destaque)"
+                          />
+                          {opcao}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              ))}
+            </motion.section>
+          )}
+
           {item.ingredientes.length > 0 && (
-            <motion.section custom={2} variants={aparecer} initial="oculto" animate="visivel">
+            <motion.section custom={3} variants={aparecer} initial="oculto" animate="visivel">
               <h4 className="mb-2 text-xs font-semibold tracking-wider text-(--texto-fraco) uppercase">Ingredientes</h4>
               <ul className="flex flex-wrap gap-2">
                 {item.ingredientes.map((ingrediente, i) => (

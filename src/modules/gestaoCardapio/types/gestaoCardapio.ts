@@ -23,6 +23,12 @@ export type Midia = {
   url: string;
 };
 
+/** `Especificacao`: grupo de opção única que o cliente escolhe (ex.: ponto da carne). */
+export type Especificacao = {
+  nome: string;
+  opcoes: string[];
+};
+
 /** `ItemCardapioResponseDTO`. */
 export type ItemCardapio = {
   id: string;
@@ -33,6 +39,7 @@ export type ItemCardapio = {
   ordem: number;
   categorias: Categoria[];
   ingredientes: string[];
+  especificacoes: Especificacao[];
   imagens: Midia[];
   video: {
     status: StatusVideo;
@@ -52,8 +59,19 @@ export type ItemCardapioPayload = {
   ordem: number;
   categoriaIds: string[];
   ingredientes: string[];
+  especificacoes: Especificacao[];
   imagens: string[];
   videoCaminho?: string;
+};
+
+/** `RestauranteResponseDTO` (só o que o painel do gestor usa). */
+export type MeuRestaurante = {
+  id: string;
+  nome: string;
+  slug: string;
+  logoUrl?: string;
+  /** Hex `#rrggbb`; ausente = cor padrão. */
+  corDestaque?: string;
 };
 
 /** `MetricasResponseDTO`. */

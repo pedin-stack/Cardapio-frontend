@@ -17,6 +17,8 @@
   --destaque: #ff6b4a;
   --destaque-2: #ffb36b;
   --destaque-suave: rgb(255 107 74 / 0.16);
+  /* Texto sobre o destaque. O cardápio troca os quatro pela cor do restaurante (src/utils/cor.ts). */
+  --sobre-destaque: #fff;
   --sucesso: #3ddc97;
   --perigo: #ff5470;
   --aviso: #ffc861;

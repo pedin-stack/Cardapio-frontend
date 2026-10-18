@@ -1,8 +1,10 @@
 /**
  * @description Campo de texto do painel (compatível com `register` do RHF) com label, erro acessível
- * (`aria-invalid` + `aria-describedby` → `role="alert"`) e visual de vidro.
+ * (`aria-invalid` + `aria-describedby` → `role="alert"`) e visual de vidro. `type="password"` ganha o botão de
+ * mostrar/ocultar a senha.
  */
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
+import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
+import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 type BaseProps = {
   label: string;
@@ -33,20 +35,44 @@ function Moldura({ id, label, erro, dica, wrapperClassName, children }: BaseProp
 }
 
 export const InputField = forwardRef<HTMLInputElement, BaseProps & InputHTMLAttributes<HTMLInputElement>>(function InputField(
-  { label, erro, dica, wrapperClassName, className, ...props },
+  { label, erro, dica, wrapperClassName, className, type, ...props },
   ref,
 ) {
   const id = useId();
+  const ehSenha = type === "password";
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
+
+  const campo = (
+    <input
+      ref={ref}
+      id={id}
+      type={ehSenha && senhaVisivel ? "text" : type}
+      aria-invalid={Boolean(erro)}
+      aria-describedby={erro ? `${id}-erro` : undefined}
+      className={`${CLASSE_CAMPO} ${ehSenha ? "pr-12" : ""} ${className ?? ""}`}
+      {...props}
+    />
+  );
+
   return (
     <Moldura id={id} label={label} erro={erro} dica={dica} wrapperClassName={wrapperClassName}>
-      <input
-        ref={ref}
-        id={id}
-        aria-invalid={Boolean(erro)}
-        aria-describedby={erro ? `${id}-erro` : undefined}
-        className={`${CLASSE_CAMPO} ${className ?? ""}`}
-        {...props}
-      />
+      {ehSenha ? (
+        <div className="relative">
+          {campo}
+          <button
+            type="button"
+            onClick={() => setSenhaVisivel((v) => !v)}
+            aria-label={senhaVisivel ? "Ocultar senha" : "Mostrar senha"}
+            aria-pressed={senhaVisivel}
+            aria-controls={id}
+            className="absolute inset-y-0 right-1 my-auto grid size-10 place-items-center rounded-full text-(--texto-suave) transition hover:text-(--texto) focus-visible:ring-2 focus-visible:ring-(--destaque)/70 focus-visible:outline-none"
+          >
+            {senhaVisivel ? <EyeSlashIcon size={20} aria-hidden /> : <EyeIcon size={20} aria-hidden />}
+          </button>
+        </div>
+      ) : (
+        campo
+      )}
     </Moldura>
   );
 });

@@ -1,11 +1,13 @@
 /**
  * @description Mídia do item em carrossel horizontal (vídeo primeiro, depois até 8 imagens).
- * CSS scroll-snap nativo (sem lib) + indicadores animados. Toque simples/duplo vem do pai.
+ * CSS scroll-snap nativo (sem lib) + indicadores animados. Toque simples/duplo vem do pai. No feed, deslizar além
+ * da última mídia (ou antes da primeira) troca de categoria.
+ * ponytail: só toque; no desktop a troca de categoria fica com os chips.
  */
-import { useRef, useState } from "react";
+import { useRef, useState, type TouchEvent } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ForkKnifeIcon } from "@phosphor-icons/react";
+import { CaretLeftIcon, CaretRightIcon, ForkKnifeIcon } from "@phosphor-icons/react";
 
 import { HlsVideo } from "@/components/video/HlsVideo";
 import type { ModoVideo } from "@/components/video/janelaVideos";
@@ -19,13 +21,52 @@ type CarrosselMidiaProps = {
   prioridade?: boolean;
   onToque?: () => void;
   arredondado?: boolean;
+  /** Categorias para onde o deslize além das pontas leva (nome exibido na dica). */
+  vizinhas?: { proxima?: string; anterior?: string };
+  /** Deslizou além da última (1) ou antes da primeira (-1) mídia. */
+  onDeslizarAlem?: (direcao: 1 | -1) => void;
 };
 
-export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arredondado }: CarrosselMidiaProps) {
+/** Distância (px) que o dedo precisa passar da ponta para trocar de categoria. */
+const LIMIAR_DESLIZE = 70;
+
+export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arredondado, vizinhas, onDeslizarAlem }: CarrosselMidiaProps) {
   const trilho = useRef<HTMLDivElement>(null);
   const [slide, setSlide] = useState(0);
   const temVideo = Boolean(item.videoHlsUrl);
   const total = (temVideo ? 1 : 0) + item.imagens.length;
+
+  // Gesto além das pontas: o scroll nativo já parou, então lemos o dedo (touch*; pointer* é cancelado pelo scroll).
+  // O slide é o do INÍCIO do toque: durante o gesto o scroll já atualiza `slide`, e passar da foto 1 para a
+  // última não pode contar como "além da última".
+  const gesto = useRef<{ x: number; y: number; slide: number } | null>(null);
+  const [puxando, setPuxando] = useState<{ direcao: 1 | -1; progresso: number } | null>(null);
+
+  const destinoDo = (inicio: { x: number; y: number; slide: number }, toque: { clientX: number; clientY: number }): 1 | -1 | null => {
+    const dx = toque.clientX - inicio.x;
+    if (Math.abs(dx) < Math.abs(toque.clientY - inicio.y) * 1.5) return null;
+    if (dx < 0 && inicio.slide === total - 1 && vizinhas?.proxima) return 1;
+    if (dx > 0 && inicio.slide === 0 && vizinhas?.anterior) return -1;
+    return null;
+  };
+
+  const aoIniciarToque = (e: TouchEvent) => {
+    gesto.current = onDeslizarAlem ? { x: e.touches[0].clientX, y: e.touches[0].clientY, slide } : null;
+  };
+  const aoMoverToque = (e: TouchEvent) => {
+    if (!gesto.current) return;
+    const direcao = destinoDo(gesto.current, e.touches[0]);
+    const progresso = Math.min(1, Math.abs(e.touches[0].clientX - gesto.current.x) / LIMIAR_DESLIZE);
+    setPuxando(direcao ? { direcao, progresso } : null);
+  };
+  const aoSoltarToque = (e: TouchEvent) => {
+    const inicio = gesto.current;
+    gesto.current = null;
+    setPuxando(null);
+    if (!inicio || !onDeslizarAlem) return;
+    const direcao = destinoDo(inicio, e.changedTouches[0]);
+    if (direcao && Math.abs(e.changedTouches[0].clientX - inicio.x) >= LIMIAR_DESLIZE) onDeslizarAlem(direcao);
+  };
 
   const aoRolar = () => {
     const el = trilho.current;
@@ -34,7 +75,7 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
 
   if (total === 0) {
     return (
-      <div className="grid size-full place-items-center bg-[radial-gradient(circle_at_30%_20%,rgba(255,107,74,0.35),transparent_60%),radial-gradient(circle_at_70%_80%,rgba(255,179,107,0.25),transparent_55%)]">
+      <div className="grid size-full place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_srgb,var(--destaque)_35%,transparent),transparent_60%),radial-gradient(circle_at_70%_80%,color-mix(in_srgb,var(--destaque-2)_25%,transparent),transparent_55%)]">
         <ForkKnifeIcon size={64} weight="thin" className="text-white/40" aria-hidden />
       </div>
     );
@@ -46,6 +87,10 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
         ref={trilho}
         onScroll={aoRolar}
         onClick={onToque}
+        onTouchStart={aoIniciarToque}
+        onTouchMove={aoMoverToque}
+        onTouchEnd={aoSoltarToque}
+        onTouchCancel={() => setPuxando(null)}
         className="sem-scrollbar flex size-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain touch-manipulation"
       >
         {temVideo && (
@@ -74,6 +119,20 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
           </div>
         ))}
       </div>
+
+      {/* Dica do deslize além da ponta: acompanha o dedo e "acende" quando soltar já troca de categoria. */}
+      {puxando && (
+        <div
+          className={`pointer-events-none absolute top-1/2 flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+            puxando.direcao === 1 ? "right-3" : "left-3 flex-row-reverse"
+          } ${puxando.progresso >= 1 ? "gradiente-destaque text-(--sobre-destaque)" : "vidro text-white"}`}
+          style={{ opacity: 0.35 + puxando.progresso * 0.65, transform: `translateY(-50%) translateX(${(1 - puxando.progresso) * 24 * puxando.direcao}px)` }}
+          aria-hidden
+        >
+          {puxando.direcao === 1 ? vizinhas?.proxima : vizinhas?.anterior}
+          {puxando.direcao === 1 ? <CaretRightIcon size={16} weight="bold" /> : <CaretLeftIcon size={16} weight="bold" />}
+        </div>
+      )}
 
       {total > 1 && (
         <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] flex justify-center gap-1.5" aria-hidden>

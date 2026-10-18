@@ -25,10 +25,15 @@ O navegador chama `/api/*` no próprio domínio da Vercel e o `src/middleware.ts
 
 | Rota | Quem | O quê |
 |---|---|---|
-| `/{slug}` | cliente (sem login) | hero → feed vertical um-prato-por-tela, curtir (toque no coração ou dois toques na foto), aba Curtidos (o "carrinho") |
+| `/{slug}` | cliente (sem login) | hero → feed vertical um-prato-por-tela (deslizar além da última foto troca de categoria), curtir (toque no coração ou dois toques na foto), aba Explorar (mosaico + busca), aba Curtidos (o "carrinho", com quantidade e especificações escolhidas) |
 | `/login` | gestor / super admin | entra e vai para a área do perfil |
-| `/painel` · `/painel/categorias` · `/painel/metricas` | gestor | itens (até 8 fotos + 1 vídeo), categorias, métricas |
-| `/plataforma` | super admin | restaurantes: cadastrar (com o gestor), ativar/desativar, editar |
+| `/painel` · `/painel/categorias` · `/painel/metricas` · `/painel/restaurante` | gestor | itens (até 8 fotos + 1 vídeo, especificações), categorias, métricas, cor do cardápio |
+| `/plataforma` | super admin | restaurantes: cadastrar (com o gestor e a cor), ativar/desativar, editar |
+
+**Explorar:** o cardápio chega inteiro numa resposta; a grade mostra 9 e soma mais 9 quando o cliente rola até perto do
+fim ("paginação mascarada", `AbaExplorar.tsx`). A busca ordena por nome → categoria → ingrediente, sem acento
+(`utils/buscaExplorar.ts`). **Cor do restaurante:** `CardapioPublicoPage` troca `--destaque`, `--destaque-2`,
+`--destaque-suave` e `--sobre-destaque` (texto escuro sobre cores claras, `src/utils/cor.ts`); o painel continua coral.
 | restaurante desativado ou rota inexistente | — | tela 404 "Serviço indisponível" |
 
 ## Vídeo em chunks (estilo TikTok)

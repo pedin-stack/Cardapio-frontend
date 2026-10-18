@@ -1,5 +1,6 @@
 /**
  * @description Ingredientes como etiquetas: Enter ou vírgula adiciona; Backspace no campo vazio remove o último.
+ * Também serve para as opções de uma especificação (rótulo e limites por props).
  */
 import { useId, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,9 +12,13 @@ type CampoIngredientesProps = {
   ingredientes: string[];
   onChange: (ingredientes: string[]) => void;
   erro?: string;
+  rotulo?: string;
+  /** Máximo de etiquetas e de caracteres por etiqueta (padrão: os limites de ingredientes do back). */
+  limite?: number;
+  tamanhoMaximo?: number;
 };
 
-export function CampoIngredientes({ ingredientes, onChange, erro }: CampoIngredientesProps) {
+export function CampoIngredientes({ ingredientes, onChange, erro, rotulo = "Ingredientes", limite = 40, tamanhoMaximo = 80 }: CampoIngredientesProps) {
   const id = useId();
   const [texto, setTexto] = useState("");
 
@@ -22,14 +27,14 @@ export function CampoIngredientes({ ingredientes, onChange, erro }: CampoIngredi
       .split(",")
       .map((parte) => parte.trim())
       .filter((parte) => parte && !ingredientes.some((i) => i.toLowerCase() === parte.toLowerCase()));
-    if (novos.length > 0) onChange([...ingredientes, ...novos].slice(0, 40));
+    if (novos.length > 0) onChange([...ingredientes, ...novos].slice(0, limite));
     setTexto("");
   };
 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-medium text-(--texto-suave)">
-        Ingredientes
+        {rotulo}
       </label>
       <div className={`${CLASSE_CAMPO} flex flex-wrap items-center gap-1.5 px-2.5 py-2 focus-within:ring-2 focus-within:ring-(--destaque)/70`}>
         <AnimatePresence initial={false}>
@@ -67,7 +72,7 @@ export function CampoIngredientes({ ingredientes, onChange, erro }: CampoIngredi
             }
           }}
           onBlur={adicionar}
-          maxLength={80}
+          maxLength={tamanhoMaximo}
           placeholder={ingredientes.length === 0 ? "Digite e tecle Enter" : ""}
           aria-invalid={Boolean(erro)}
           className="min-w-24 flex-1 bg-transparent px-1.5 py-1 text-[15px] outline-none placeholder:text-(--texto-fraco)"

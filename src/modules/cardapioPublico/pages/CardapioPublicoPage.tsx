@@ -1,6 +1,6 @@
 /**
  * @description Cardápio público (cliente, sem login): hero → feed vertical um-prato-por-tela com vídeo HLS em
- * janela, curtidas como carrinho e rastreio de tempo por item.
+ * janela, aba Explorar (grade + busca), curtidas como carrinho, rastreio de tempo por item e a cor do restaurante.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
@@ -12,7 +12,10 @@ import { ServicoIndisponivel } from "@/components/ServicoIndisponivel";
 import { EmptyState, ErrorState } from "@/components/UIStates";
 import { calcularModosVideo } from "@/components/video/janelaVideos";
 
+import { variaveisDoTema } from "@/utils/cor";
+
 import { AbaCurtidos } from "../components/AbaCurtidos";
+import { AbaExplorar } from "../components/AbaExplorar";
 import { BarraNavegacao, type Aba } from "../components/BarraNavegacao";
 import { ChipsCategorias } from "../components/ChipsCategorias";
 import { DetalheItemSheet } from "../components/DetalheItemSheet";
@@ -22,6 +25,7 @@ import { useCardapioPublico } from "../hooks/useCardapioPublico";
 import { useCurtidos } from "../hooks/useCurtidos";
 import { useRastreioVisualizacao } from "../hooks/useRastreioVisualizacao";
 import type { ItemPublico } from "../types/cardapioPublico";
+import { categoriaVizinha } from "../utils/categoriaVizinha";
 
 /** Índice "virtual" do hero no feed: nenhum card ativo. */
 const INDICE_HERO = -1;
@@ -30,7 +34,7 @@ export default function CardapioPublicoPage() {
   const router = useRouter();
   const slug = typeof router.query.slug === "string" ? router.query.slug : undefined;
   const { cardapio, loading, indisponivel, erro, refetch } = useCardapioPublico(slug);
-  const { curtidos, alternar, isCurtido } = useCurtidos(slug);
+  const { curtidos, alternar, isCurtido, quantidade, escolhas, definirQuantidade, escolher } = useCurtidos(slug);
 
   const [categoria, setCategoria] = useState<string | null>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(INDICE_HERO);
@@ -88,7 +92,35 @@ export default function CardapioPublicoPage() {
     requestAnimationFrame(() => secoes.current.get(0)?.scrollIntoView({ behavior: "smooth" }));
   };
 
-  const pausarVideos = Boolean(detalhe) || aba === "curtidos";
+  // Cor do restaurante: no <html> para alcançar também o que fica fora desta árvore (toasts, seleção de texto).
+  const corDestaque = cardapio?.restaurante.corDestaque;
+  useEffect(() => {
+    if (!corDestaque) return;
+    const estilo = document.documentElement.style;
+    const variaveis = Object.entries(variaveisDoTema(corDestaque));
+    variaveis.forEach(([nome, valor]) => estilo.setProperty(nome, valor));
+    return () => variaveis.forEach(([nome]) => estilo.removeProperty(nome));
+  }, [corDestaque]);
+
+  const vizinhasDe = useCallback(
+    (item: ItemPublico) => {
+      const lista = cardapio?.categorias ?? [];
+      const proxima = categoriaVizinha(lista, categoria, item, 1);
+      const anterior = categoriaVizinha(lista, categoria, item, -1);
+      return {
+        proxima: proxima?.nome,
+        anterior: anterior === null ? "Tudo" : anterior?.nome,
+      };
+    },
+    [cardapio, categoria],
+  );
+
+  const deslizarParaCategoria = (item: ItemPublico, direcao: 1 | -1) => {
+    const destino = categoriaVizinha(cardapio?.categorias ?? [], categoria, item, direcao);
+    if (destino !== undefined) trocarCategoria(destino?.id ?? null);
+  };
+
+  const pausarVideos = Boolean(detalhe) || aba !== "cardapio";
   const modosVideo = useMemo(() => {
     const comVideo = itens.flatMap((item, i) => (item.videoHlsUrl ? [i] : []));
     return calcularModosVideo(comVideo, indiceAtivo, pausarVideos);
@@ -113,8 +145,8 @@ export default function CardapioPublicoPage() {
         {cardapio.restaurante.descricao && <meta name="description" content={cardapio.restaurante.descricao} />}
       </Head>
 
-      <div className="min-h-svh bg-[radial-gradient(circle_at_50%_0%,rgba(255,107,74,0.12),transparent_60%)]">
-        <div className="relative mx-auto max-w-[480px] md:shadow-[0_0_120px_-20px_rgba(255,107,74,0.25)]">
+      <div className="min-h-svh bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--destaque)_12%,transparent),transparent_60%)]">
+        <div className="relative mx-auto max-w-[480px] md:shadow-[0_0_120px_-20px_color-mix(in_srgb,var(--destaque)_25%,transparent)]">
           <div className="pointer-events-none fixed inset-x-0 top-0 z-20 mx-auto max-w-[480px]">
             {cardapio.categorias.length > 0 && (
               <ChipsCategorias
@@ -161,15 +193,24 @@ export default function CardapioPublicoPage() {
                   onAlternarCurtida={() => alternar(item.id)}
                   onAbrirDetalhe={() => setDetalhe(item)}
                   onAlternarSom={() => setMudo((m) => !m)}
+                  vizinhas={vizinhasDe(item)}
+                  onDeslizarAlem={(direcao) => deslizarParaCategoria(item, direcao)}
                 />
               ))
             )}
           </main>
 
           <AnimatePresence>
+            {aba === "explorar" && (
+              <AbaExplorar key="explorar" itens={cardapio.itens} categorias={cardapio.categorias} onAbrir={setDetalhe} />
+            )}
             {aba === "curtidos" && (
               <AbaCurtidos
+                key="curtidos"
                 itens={itensCurtidos}
+                quantidade={quantidade}
+                escolhas={escolhas}
+                onDefinirQuantidade={definirQuantidade}
                 onRemover={(id) => alternar(id)}
                 onAbrir={setDetalhe}
                 onVoltarAoCardapio={() => setAba("cardapio")}
@@ -184,6 +225,8 @@ export default function CardapioPublicoPage() {
             curtido={detalhe ? isCurtido(detalhe.id) : false}
             nomesCategorias={detalhe ? nomesDe(detalhe) : []}
             mudo={mudo}
+            escolhas={detalhe ? escolhas(detalhe.id) : {}}
+            onEscolher={(grupo, opcao) => detalhe && escolher(detalhe.id, grupo, opcao)}
             onAlternarCurtida={() => detalhe && alternar(detalhe.id)}
             onClose={() => setDetalhe(null)}
           />

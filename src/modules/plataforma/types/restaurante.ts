@@ -12,6 +12,8 @@ export type Restaurante = {
   logoUrl?: string;
   capaPath?: string;
   capaUrl?: string;
+  /** Hex `#rrggbb`; ausente = cor padrão. */
+  corDestaque?: string;
   ativo: boolean;
   criadoEm: string;
   gestorNome?: string;
@@ -25,6 +27,7 @@ export type RestaurantePayload = {
   descricao?: string;
   logoPath?: string;
   capaPath?: string;
+  corDestaque?: string;
   gestorNome: string;
   gestorEmail: string;
   gestorSenha: string;
@@ -37,5 +40,6 @@ export type RestauranteAtualizarPayload = {
   descricao?: string;
   logoPath?: string;
   capaPath?: string;
+  corDestaque?: string;
   gestorSenha?: string;
 };

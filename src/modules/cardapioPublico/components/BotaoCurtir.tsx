@@ -34,7 +34,7 @@ export function BotaoCurtir({ curtido, onAlternar, tamanho = "lg", className }: 
         initial={{ scale: curtido ? 0.4 : 1 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 520, damping: 14 }}
-        className={curtido ? "text-(--destaque) drop-shadow-[0_0_12px_rgba(255,107,74,0.7)]" : "text-white"}
+        className={curtido ? "text-(--destaque) drop-shadow-[0_0_12px_color-mix(in_srgb,var(--destaque)_70%,transparent)]" : "text-white"}
       >
         <HeartIcon size={icone} weight={curtido ? "fill" : "bold"} aria-hidden />
       </motion.span>

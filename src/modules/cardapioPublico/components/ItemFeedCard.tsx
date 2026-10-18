@@ -25,10 +25,13 @@ type ItemFeedCardProps = {
   onAlternarCurtida: () => void;
   onAbrirDetalhe: () => void;
   onAlternarSom: () => void;
+  /** Categorias vizinhas e a troca ao deslizar além das pontas do carrossel. */
+  vizinhas?: { proxima?: string; anterior?: string };
+  onDeslizarAlem?: (direcao: 1 | -1) => void;
 };
 
 export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function ItemFeedCard(
-  { item, indice, modoVideo, ativo, curtido, mudo, nomesCategorias, onAlternarCurtida, onAbrirDetalhe, onAlternarSom },
+  { item, indice, modoVideo, ativo, curtido, mudo, nomesCategorias, onAlternarCurtida, onAbrirDetalhe, onAlternarSom, vizinhas, onDeslizarAlem },
   ref,
 ) {
   const [coracao, setCoracao] = useState(0);
@@ -54,7 +57,15 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
         animate={{ scale: ativo ? 1 : 1.06, opacity: ativo ? 1 : 0.6 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       >
-        <CarrosselMidia item={item} modoVideo={modoVideo} mudo={mudo} prioridade={indice === 0} onToque={aoToque} />
+        <CarrosselMidia
+          item={item}
+          modoVideo={modoVideo}
+          mudo={mudo}
+          prioridade={indice === 0}
+          onToque={aoToque}
+          vizinhas={vizinhas}
+          onDeslizarAlem={onDeslizarAlem}
+        />
       </motion.div>
 
       {/* Escurece a base para o texto ficar legível sobre qualquer foto. */}
@@ -71,7 +82,7 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
             transition={{ duration: 0.9, times: [0, 0.3, 0.7, 1], ease: "easeOut" }}
             onAnimationComplete={() => setCoracao(0)}
           >
-            <HeartIcon size={120} weight="fill" className="text-(--destaque) drop-shadow-[0_0_40px_rgba(255,107,74,0.8)]" aria-hidden />
+            <HeartIcon size={120} weight="fill" className="text-(--destaque) drop-shadow-[0_0_40px_color-mix(in_srgb,var(--destaque)_80%,transparent)]" aria-hidden />
           </motion.div>
         )}
       </AnimatePresence>
@@ -126,7 +137,7 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
           )}
           <h2 className="font-display text-[1.75rem] leading-tight font-semibold text-balance drop-shadow-lg">{item.nome}</h2>
           {item.descricao && <p className="mt-1.5 line-clamp-2 text-sm text-white/80">{item.descricao}</p>}
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full gradiente-destaque px-4 py-1.5 text-base font-semibold text-white shadow-[0_8px_30px_-6px_rgba(255,107,74,0.7)]">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full gradiente-destaque px-4 py-1.5 text-base font-semibold text-(--sobre-destaque) shadow-[0_8px_30px_-6px_color-mix(in_srgb,var(--destaque)_70%,transparent)]">
             {formatarMoeda(item.valor)}
           </div>
         </button>

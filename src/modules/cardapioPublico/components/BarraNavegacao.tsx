@@ -1,10 +1,11 @@
 /**
- * @description Barra inferior em vidro: Cardápio | Curtidos (com contador que "pula" a cada curtida).
+ * @description Barra inferior em vidro: Cardápio | Explorar | Curtidos (com contador que "pula" a cada curtida).
+ * Com três abas, o rótulo aparece só na ativa (as outras ficam só com o ícone) para caber no celular.
  */
 import { AnimatePresence, motion } from "framer-motion";
-import { ForkKnifeIcon, HeartIcon } from "@phosphor-icons/react";
+import { ForkKnifeIcon, HeartIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 
-export type Aba = "cardapio" | "curtidos";
+export type Aba = "cardapio" | "explorar" | "curtidos";
 
 type BarraNavegacaoProps = {
   aba: Aba;
@@ -15,6 +16,7 @@ type BarraNavegacaoProps = {
 export function BarraNavegacao({ aba, totalCurtidos, onTrocar }: BarraNavegacaoProps) {
   const abas = [
     { id: "cardapio" as const, rotulo: "Cardápio", Icone: ForkKnifeIcon },
+    { id: "explorar" as const, rotulo: "Explorar", Icone: MagnifyingGlassIcon },
     { id: "curtidos" as const, rotulo: "Curtidos", Icone: HeartIcon },
   ];
 
@@ -34,7 +36,8 @@ export function BarraNavegacao({ aba, totalCurtidos, onTrocar }: BarraNavegacaoP
             type="button"
             onClick={() => onTrocar(id)}
             aria-current={ativa ? "page" : undefined}
-            className={`relative flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-colors ${ativa ? "text-white" : "text-white/60"}`}
+            aria-label={id === "curtidos" && totalCurtidos > 0 ? `${rotulo} (${totalCurtidos})` : rotulo}
+            className={`relative flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-[color,flex-grow] duration-300 ${ativa ? "flex-[1.6] text-white" : "flex-1 text-white/60"}`}
           >
             {ativa && (
               <motion.span
@@ -44,7 +47,20 @@ export function BarraNavegacao({ aba, totalCurtidos, onTrocar }: BarraNavegacaoP
               />
             )}
             <Icone size={20} weight={ativa ? "fill" : "regular"} className="relative" aria-hidden />
-            <span className="relative">{rotulo}</span>
+            <AnimatePresence initial={false}>
+              {ativa && (
+                <motion.span
+                  className="relative overflow-hidden whitespace-nowrap"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                  aria-hidden
+                >
+                  {rotulo}
+                </motion.span>
+              )}
+            </AnimatePresence>
             {id === "curtidos" && totalCurtidos > 0 && (
               <AnimatePresence mode="popLayout">
                 <motion.span
@@ -52,7 +68,7 @@ export function BarraNavegacao({ aba, totalCurtidos, onTrocar }: BarraNavegacaoP
                   initial={{ scale: 0.2, y: -8 }}
                   animate={{ scale: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 600, damping: 15 }}
-                  className="relative grid min-w-5 place-items-center rounded-full gradiente-destaque px-1.5 text-[11px] leading-5 font-bold text-white"
+                  className="relative grid min-w-5 place-items-center rounded-full gradiente-destaque px-1.5 text-[11px] leading-5 font-bold text-(--sobre-destaque)"
                   aria-label={`${totalCurtidos} curtidos`}
                 >
                   {totalCurtidos}

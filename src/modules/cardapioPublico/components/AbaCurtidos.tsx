@@ -1,25 +1,30 @@
 /**
- * @description Aba "Curtidos" — o carrinho do cardápio: lista os curtidos (mais recente primeiro) com total.
- * Arrastar para a esquerda (ou o X) remove = descurtir.
+ * @description Aba "Curtidos" — o carrinho do cardápio: lista os curtidos (mais recente primeiro) com quantidade,
+ * escolhas e total. Arrastar para a esquerda (ou o X) remove = descurtir.
  */
 import Image from "next/image";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
-import { ForkKnifeIcon, HeartBreakIcon, XIcon } from "@phosphor-icons/react";
+import { ForkKnifeIcon, HeartBreakIcon, MinusIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 
 import { EmptyState } from "@/components/UIStates";
 import { formatarMoeda } from "@/utils/formatarMoeda";
 
+import { QUANTIDADE_MAXIMA } from "../hooks/useCurtidos";
 import type { ItemPublico } from "../types/cardapioPublico";
 
 type AbaCurtidosProps = {
   itens: ItemPublico[];
+  quantidade: (itemId: string) => number;
+  escolhas: (itemId: string) => Record<string, string>;
+  onDefinirQuantidade: (itemId: string, quantidade: number) => void;
   onRemover: (itemId: string) => void;
   onAbrir: (item: ItemPublico) => void;
   onVoltarAoCardapio: () => void;
 };
 
-export function AbaCurtidos({ itens, onRemover, onAbrir, onVoltarAoCardapio }: AbaCurtidosProps) {
-  const total = itens.reduce((soma, item) => soma + item.valor, 0);
+export function AbaCurtidos({ itens, quantidade, escolhas, onDefinirQuantidade, onRemover, onAbrir, onVoltarAoCardapio }: AbaCurtidosProps) {
+  const total = itens.reduce((soma, item) => soma + item.valor * quantidade(item.id), 0);
+  const unidades = itens.reduce((soma, item) => soma + quantidade(item.id), 0);
 
   return (
     <motion.section
@@ -41,7 +46,11 @@ export function AbaCurtidos({ itens, onRemover, onAbrir, onVoltarAoCardapio }: A
           titulo="Nada curtido ainda"
           descricao="Toque no coração (ou dê dois toques na foto) dos pratos que chamarem sua atenção."
           acao={
-            <button type="button" onClick={onVoltarAoCardapio} className="rounded-full gradiente-destaque px-6 py-2.5 text-sm font-semibold">
+            <button
+              type="button"
+              onClick={onVoltarAoCardapio}
+              className="rounded-full gradiente-destaque px-6 py-2.5 text-sm font-semibold text-(--sobre-destaque)"
+            >
               Explorar o cardápio
             </button>
           }
@@ -51,7 +60,16 @@ export function AbaCurtidos({ itens, onRemover, onAbrir, onVoltarAoCardapio }: A
           <ul className="sem-scrollbar flex-1 space-y-3 overflow-y-auto px-4 pb-48">
             <AnimatePresence initial={false}>
               {itens.map((item, i) => (
-                <CurtidoLinha key={item.id} item={item} indice={i} onRemover={onRemover} onAbrir={onAbrir} />
+                <CurtidoLinha
+                  key={item.id}
+                  item={item}
+                  indice={i}
+                  quantidade={quantidade(item.id)}
+                  escolhas={escolhas(item.id)}
+                  onDefinirQuantidade={onDefinirQuantidade}
+                  onRemover={onRemover}
+                  onAbrir={onAbrir}
+                />
               ))}
             </AnimatePresence>
           </ul>
@@ -62,7 +80,7 @@ export function AbaCurtidos({ itens, onRemover, onAbrir, onVoltarAoCardapio }: A
           >
             <div className="flex items-baseline justify-between">
               <span className="text-sm text-(--texto-suave)">
-                {itens.length} {itens.length === 1 ? "item" : "itens"}
+                {unidades} {unidades === 1 ? "item" : "itens"}
               </span>
               <motion.span key={total} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="font-display text-2xl font-bold">
                 {formatarMoeda(total)}
@@ -78,12 +96,17 @@ export function AbaCurtidos({ itens, onRemover, onAbrir, onVoltarAoCardapio }: A
 type CurtidoLinhaProps = {
   item: ItemPublico;
   indice: number;
+  quantidade: number;
+  escolhas: Record<string, string>;
+  onDefinirQuantidade: (itemId: string, quantidade: number) => void;
   onRemover: (itemId: string) => void;
   onAbrir: (item: ItemPublico) => void;
 };
 
-function CurtidoLinha({ item, indice, onRemover, onAbrir }: CurtidoLinhaProps) {
+function CurtidoLinha({ item, indice, quantidade, escolhas, onDefinirQuantidade, onRemover, onAbrir }: CurtidoLinhaProps) {
   const miniatura = item.imagens[0] ?? item.videoPosterUrl;
+  // Só as escolhas de grupos que o item ainda tem (o gestor pode ter mudado as especificações).
+  const resumo = item.especificacoes.flatMap((e) => (escolhas[e.nome] ? [escolhas[e.nome]] : [])).join(" · ");
 
   const aoSoltar = (_: unknown, info: PanInfo) => {
     if (info.offset.x < -110 || info.velocity.x < -700) onRemover(item.id);
@@ -104,19 +127,31 @@ function CurtidoLinha({ item, indice, onRemover, onAbrir }: CurtidoLinhaProps) {
         onDragEnd={aoSoltar}
         className="flex items-center gap-3 rounded-2xl vidro-claro p-2.5 pr-3"
       >
-        <button type="button" onClick={() => onAbrir(item)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-          <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-white/5">
-            {miniatura ? (
-              <Image src={miniatura} alt="" fill sizes="64px" className="object-cover" />
-            ) : (
-              <ForkKnifeIcon size={24} className="absolute inset-0 m-auto text-white/40" aria-hidden />
-            )}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate font-semibold">{item.nome}</p>
-            <p className="text-sm text-(--destaque)">{formatarMoeda(item.valor)}</p>
-          </div>
+        <button
+          type="button"
+          onClick={() => onAbrir(item)}
+          aria-label={`Ver ${item.nome}`}
+          className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-white/5"
+        >
+          {miniatura ? (
+            <Image src={miniatura} alt="" fill sizes="64px" className="object-cover" />
+          ) : (
+            <ForkKnifeIcon size={24} className="absolute inset-0 m-auto text-white/40" aria-hidden />
+          )}
         </button>
+
+        {/* Nome em cima, sozinho na linha; preço e quantidade embaixo (o nome não disputa espaço com o +/−). */}
+        <div className="min-w-0 flex-1">
+          <button type="button" onClick={() => onAbrir(item)} className="block w-full min-w-0 text-left">
+            <p className="truncate font-semibold">{item.nome}</p>
+            {resumo && <p className="truncate text-xs text-(--texto-suave)">{resumo}</p>}
+          </button>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <p className="text-sm text-(--destaque)">{formatarMoeda(item.valor * quantidade)}</p>
+            <Quantidade item={item} quantidade={quantidade} onDefinirQuantidade={onDefinirQuantidade} />
+          </div>
+        </div>
+
         <motion.button
           type="button"
           whileTap={{ scale: 0.85 }}
@@ -128,5 +163,41 @@ function CurtidoLinha({ item, indice, onRemover, onAbrir }: CurtidoLinhaProps) {
         </motion.button>
       </motion.div>
     </motion.li>
+  );
+}
+
+type QuantidadeProps = {
+  item: ItemPublico;
+  quantidade: number;
+  onDefinirQuantidade: (itemId: string, quantidade: number) => void;
+};
+
+function Quantidade({ item, quantidade, onDefinirQuantidade }: QuantidadeProps) {
+  return (
+    <div className="flex shrink-0 items-center gap-1 rounded-full bg-white/8 p-0.5 ring-1 ring-white/10" role="group" aria-label={`Quantidade de ${item.nome}`}>
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.85 }}
+        onClick={() => onDefinirQuantidade(item.id, quantidade - 1)}
+        disabled={quantidade <= 1}
+        aria-label="Diminuir"
+        className="grid size-7 place-items-center rounded-full disabled:opacity-35"
+      >
+        <MinusIcon size={13} weight="bold" aria-hidden />
+      </motion.button>
+      <motion.span key={quantidade} initial={{ scale: 0.6 }} animate={{ scale: 1 }} className="min-w-5 text-center text-sm font-semibold tabular-nums" aria-live="polite">
+        {quantidade}
+      </motion.span>
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.85 }}
+        onClick={() => onDefinirQuantidade(item.id, quantidade + 1)}
+        disabled={quantidade >= QUANTIDADE_MAXIMA}
+        aria-label="Aumentar"
+        className="grid size-7 place-items-center rounded-full disabled:opacity-35"
+      >
+        <PlusIcon size={13} weight="bold" aria-hidden />
+      </motion.button>
+    </div>
   );
 }

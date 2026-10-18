@@ -8,6 +8,14 @@ export type RestaurantePublico = {
   descricao?: string;
   logoUrl?: string;
   capaUrl?: string;
+  /** Hex `#rrggbb`; ausente = cor padrão. */
+  corDestaque?: string;
+};
+
+/** Grupo de opção única (`Especificacao` do back): o cliente escolhe uma opção. */
+export type Especificacao = {
+  nome: string;
+  opcoes: string[];
 };
 
 export type CategoriaPublica = {
@@ -23,6 +31,7 @@ export type ItemPublico = {
   valor: number;
   categoriaIds: string[];
   ingredientes: string[];
+  especificacoes: Especificacao[];
   imagens: string[];
   /** Playlist HLS mestre; ausente enquanto o vídeo não estiver PRONTO. */
   videoHlsUrl?: string;

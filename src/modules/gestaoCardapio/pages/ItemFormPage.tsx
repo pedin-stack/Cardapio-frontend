@@ -1,5 +1,5 @@
 /**
- * @description Cadastro/edição do item: nome, categorias (várias), descrição, valor, ingredientes,
+ * @description Cadastro/edição do item: nome, categorias (várias), descrição, valor, ingredientes, especificações,
  * até 8 fotos e 1 vídeo. Rota `/painel/itens/novo` cria; `/painel/itens/{id}` edita.
  */
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import { PainelShell } from "@/components/PainelShell";
 import { ToggleSwitch } from "@/components/ToggleSwitch";
 import { ErrorState, LoadingState } from "@/components/UIStates";
 
+import { CampoEspecificacoes } from "../components/CampoEspecificacoes";
 import { CampoIngredientes } from "../components/CampoIngredientes";
 import { CampoVideo } from "../components/CampoVideo";
 import { GaleriaImagens } from "../components/GaleriaImagens";
@@ -36,6 +37,7 @@ const VAZIO: ItemCardapioForm = {
   ordem: 0,
   categoriaIds: [],
   ingredientes: [],
+  especificacoes: [],
   imagens: [],
   video: null,
 };
@@ -49,6 +51,7 @@ function paraFormulario(item: ItemCardapio): ItemCardapioForm {
     ordem: item.ordem,
     categoriaIds: item.categorias.map((c) => c.id),
     ingredientes: item.ingredientes,
+    especificacoes: item.especificacoes ?? [],
     imagens: item.imagens,
     video: item.video.caminhoOriginal
       ? { caminho: item.video.caminhoOriginal, hlsUrl: item.video.hlsUrl, posterUrl: item.video.posterUrl }
@@ -65,6 +68,7 @@ function paraPayload(form: ItemCardapioForm): ItemCardapioPayload {
     ordem: form.ordem,
     categoriaIds: form.categoriaIds,
     ingredientes: form.ingredientes,
+    especificacoes: form.especificacoes.map((e) => ({ nome: e.nome.trim(), opcoes: e.opcoes })),
     imagens: form.imagens.map((imagem) => imagem.caminho),
     videoCaminho: form.video?.caminho,
   };
@@ -187,6 +191,21 @@ export default function ItemFormPage() {
               control={control}
               name="ingredientes"
               render={({ field }) => <CampoIngredientes ingredientes={field.value} onChange={field.onChange} erro={errors.ingredientes?.message} />}
+            />
+            <Controller
+              control={control}
+              name="especificacoes"
+              render={({ field }) => (
+                <CampoEspecificacoes
+                  especificacoes={field.value}
+                  onChange={field.onChange}
+                  erros={field.value.map((_, i) => ({
+                    nome: errors.especificacoes?.[i]?.nome?.message,
+                    opcoes: errors.especificacoes?.[i]?.opcoes?.message,
+                  }))}
+                  erro={errors.especificacoes?.message}
+                />
+              )}
             />
             <Controller
               control={control}

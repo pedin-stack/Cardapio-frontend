@@ -41,7 +41,7 @@ export function HeroRestaurante({ restaurante, totalItens, totalCategorias, capa
         {capa ? (
           <Image src={capa} alt="" fill priority sizes="(max-width: 480px) 100vw, 480px" className="object-cover" />
         ) : (
-          <div className="size-full bg-[radial-gradient(circle_at_20%_20%,rgba(255,107,74,0.55),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(255,179,107,0.4),transparent_50%),#0b0b10]" />
+          <div className="size-full bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--destaque)_55%,transparent),transparent_55%),radial-gradient(circle_at_80%_70%,color-mix(in_srgb,var(--destaque-2)_40%,transparent),transparent_50%),#0b0b10]" />
         )}
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-(--bg)" />

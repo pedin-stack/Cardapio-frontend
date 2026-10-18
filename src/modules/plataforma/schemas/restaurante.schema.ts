@@ -4,6 +4,8 @@
  */
 import { z } from "zod";
 
+import { COR_REGEX } from "@/utils/cor";
+
 /** Mesmo padrão de `RestauranteAtualizarRequestDTO.SLUG_REGEX`. */
 export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -23,6 +25,8 @@ const base = {
   descricao: z.string().max(500, "Máximo de 500 caracteres."),
   logo: z.object({ caminho: z.string(), url: z.string() }).nullable(),
   capa: z.object({ caminho: z.string(), url: z.string() }).nullable(),
+  // @Pattern(COR_REGEX); null = cor padrão
+  corDestaque: z.string().regex(COR_REGEX, "Use uma cor no formato #rrggbb.").nullable(),
 };
 
 export const restauranteCriarSchema = z.object({

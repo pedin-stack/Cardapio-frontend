@@ -4,6 +4,7 @@
 import { z } from "zod";
 
 export const MAXIMO_IMAGENS = 8; // @Size(max = 8) em imagens
+export const MAXIMO_ESPECIFICACOES = 10; // @Size(max = 10) em especificacoes
 
 export const itemCardapioSchema = z.object({
   // @NotBlank @Size(max = 120)
@@ -23,6 +24,15 @@ export const itemCardapioSchema = z.object({
   categoriaIds: z.array(z.string()).max(20, "No máximo 20 categorias."),
   // @Size(max = 40), cada um @Size(max = 80)
   ingredientes: z.array(z.string().max(80)).max(40, "No máximo 40 ingredientes."),
+  // @Size(max = 10); cada uma: nome @NotBlank @Size(max = 60), opcoes @Size(min = 2, max = 10) de @Size(max = 60)
+  especificacoes: z
+    .array(
+      z.object({
+        nome: z.string().trim().min(1, "Dê um nome à especificação.").max(60, "Máximo de 60 caracteres."),
+        opcoes: z.array(z.string().max(60)).min(2, "Adicione pelo menos 2 opções.").max(10, "No máximo 10 opções."),
+      }),
+    )
+    .max(MAXIMO_ESPECIFICACOES, "No máximo 10 especificações."),
   imagens: z.array(z.object({ caminho: z.string(), url: z.string() })).max(MAXIMO_IMAGENS, "Cada item pode ter no máximo 8 imagens."),
   video: z
     .object({

@@ -32,7 +32,7 @@ export function ChipsCategorias({ categorias, selecionada, onSelecionar, visivel
                 type="button"
                 onClick={() => onSelecionar(opcao.id)}
                 aria-pressed={ativa}
-                className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${ativa ? "text-white" : "text-white/65"}`}
+                className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${ativa ? "text-(--sobre-destaque)" : "text-white/65"}`}
               >
                 {ativa && (
                   <motion.span

@@ -14,6 +14,7 @@ import { ArrowLeftIcon, FloppyDiskIcon, TrashIcon } from "@phosphor-icons/react"
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 import { Botao } from "@/components/Botao";
 import { ConfirmacaoSheet } from "@/components/ConfirmacaoSheet";
+import { CampoCor } from "@/components/inputs/CampoCor";
 import { InputField, TextareaField } from "@/components/inputs/InputField";
 import { PainelShell } from "@/components/PainelShell";
 import { ErrorState, LoadingState } from "@/components/UIStates";
@@ -30,6 +31,7 @@ const VAZIO: RestauranteForm = {
   descricao: "",
   logo: null,
   capa: null,
+  corDestaque: null,
   gestorNome: "",
   gestorEmail: "",
   gestorSenha: "",
@@ -42,6 +44,7 @@ function paraFormulario(r: Restaurante): RestauranteForm {
     descricao: r.descricao ?? "",
     logo: r.logoPath && r.logoUrl ? { caminho: r.logoPath, url: r.logoUrl } : null,
     capa: r.capaPath && r.capaUrl ? { caminho: r.capaPath, url: r.capaUrl } : null,
+    corDestaque: r.corDestaque ?? null,
     gestorNome: r.gestorNome ?? "",
     gestorEmail: r.gestorEmail ?? "",
     gestorSenha: "",
@@ -90,6 +93,7 @@ export default function RestauranteFormPage() {
       descricao: form.descricao.trim() || undefined,
       logoPath: form.logo?.caminho,
       capaPath: form.capa?.caminho,
+      corDestaque: form.corDestaque ?? undefined,
     };
     try {
       if (id) {
@@ -165,6 +169,11 @@ export default function RestauranteFormPage() {
               {...register("slug", { onChange: () => setSlugEditado(true) })}
             />
             <TextareaField label="Descrição" erro={errors.descricao?.message} {...register("descricao")} />
+            <Controller
+              control={control}
+              name="corDestaque"
+              render={({ field }) => <CampoCor cor={field.value} onChange={field.onChange} erro={errors.corDestaque?.message} />}
+            />
           </section>
 
           <section className="flex flex-col gap-4 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8">

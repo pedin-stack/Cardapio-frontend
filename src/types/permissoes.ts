@@ -8,6 +8,8 @@ export const PERMISSOES = [
   "CORE_RESTAURANTE_CRIAR",
   "CORE_RESTAURANTE_ATUALIZAR",
   "CORE_RESTAURANTE_APAGAR",
+  // CORE: o gestor muda a aparência do próprio restaurante
+  "CORE_RESTAURANTE_ATUALIZAR_PROPRIO",
   // CORE: upload de mídia
   "CORE_MIDIA_CRIAR",
   // CARDAPIO: categorias
