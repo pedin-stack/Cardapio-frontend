@@ -3,9 +3,9 @@
  * (curtiu e desfez) e os dias/horários com mais curtidas. Um único filtro no topo vale para a tela toda:
  * o período recorta tudo; o item destaca o prato nos rankings e recorta o mapa de horários.
  */
-import { useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
-import { ClockIcon, EyeIcon, HeartBreakIcon, HeartIcon } from "@phosphor-icons/react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { CaretDownIcon, CheckIcon, ClockIcon, EyeIcon, HeartBreakIcon, HeartIcon } from "@phosphor-icons/react";
 
 import { PainelShell } from "@/components/PainelShell";
 import { ErrorState, LoadingState } from "@/components/UIStates";
@@ -53,19 +53,7 @@ export default function MetricasPage() {
             </button>
           ))}
         </div>
-        <select
-          value={itemId ?? ""}
-          onChange={(evento) => setItemId(evento.target.value || null)}
-          aria-label="Item analisado"
-          className="rounded-full bg-white/[0.06] px-4 py-2 text-sm ring-1 ring-white/10 outline-none focus:ring-2 focus:ring-(--destaque)/70"
-        >
-          <option value="">Todos os itens</option>
-          {itens.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.nome}
-            </option>
-          ))}
-        </select>
+        <SeletorItem itens={itens} valor={itemId} onChange={setItemId} />
       </div>
 
       {loading ? (
@@ -122,6 +110,104 @@ export default function MetricasPage() {
         </div>
       )}
     </PainelShell>
+  );
+}
+
+/** Lista própria em vez de `<select>`: o popup nativo ignora o tema escuro e abre branco no Windows. */
+function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: string }[]; valor: string | null; onChange: (id: string | null) => void }) {
+  const id = useId();
+  const botaoRef = useRef<HTMLButtonElement>(null);
+  const listaRef = useRef<HTMLUListElement>(null);
+  const [aberto, setAberto] = useState(false);
+  const [ativo, setAtivo] = useState(0);
+  const opcoes: { id: string | null; nome: string }[] = [{ id: null, nome: "Todos os itens" }, ...itens];
+  const selecionado = Math.max(0, opcoes.findIndex((opcao) => opcao.id === valor));
+
+  useEffect(() => {
+    if (aberto) listaRef.current?.focus();
+  }, [aberto]);
+  useEffect(() => {
+    if (aberto) document.getElementById(`${id}-${ativo}`)?.scrollIntoView({ block: "nearest" });
+  }, [aberto, ativo, id]);
+
+  const abrir = () => {
+    setAtivo(selecionado);
+    setAberto(true);
+  };
+  const fechar = () => {
+    setAberto(false);
+    botaoRef.current?.focus();
+  };
+  const escolher = (indice: number) => {
+    onChange(opcoes[indice].id);
+    fechar();
+  };
+
+  const teclar = (evento: KeyboardEvent<HTMLUListElement>) => {
+    const ultimo = opcoes.length - 1;
+    const destino: Record<string, number> = { ArrowDown: Math.min(ativo + 1, ultimo), ArrowUp: Math.max(ativo - 1, 0), Home: 0, End: ultimo };
+    if (evento.key in destino) setAtivo(destino[evento.key]);
+    else if (evento.key === "Enter" || evento.key === " ") escolher(ativo);
+    else if (evento.key === "Escape") fechar();
+    else return;
+    evento.preventDefault();
+  };
+
+  return (
+    // Fecha ao sair com Tab ou clicar fora (o foco vai para fora do contêiner).
+    <div className="relative sm:w-64" onBlur={(evento) => !evento.currentTarget.contains(evento.relatedTarget) && setAberto(false)}>
+      <button
+        ref={botaoRef}
+        type="button"
+        onClick={() => (aberto ? setAberto(false) : abrir())}
+        onKeyDown={(evento) => {
+          if (evento.key !== "ArrowDown" && evento.key !== "ArrowUp") return;
+          evento.preventDefault();
+          abrir();
+        }}
+        aria-haspopup="listbox"
+        aria-expanded={aberto}
+        aria-controls={`${id}-lista`}
+        aria-label={`Item analisado: ${opcoes[selecionado].nome}`}
+        className="flex w-full items-center justify-between gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-sm ring-1 ring-white/10 transition outline-none hover:bg-white/[0.09] focus-visible:ring-2 focus-visible:ring-(--destaque)/70"
+      >
+        <span className="truncate">{opcoes[selecionado].nome}</span>
+        <CaretDownIcon aria-hidden className={`shrink-0 text-(--texto-suave) transition-transform ${aberto ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {aberto && (
+          <motion.ul
+            ref={listaRef}
+            id={`${id}-lista`}
+            role="listbox"
+            tabIndex={-1}
+            aria-label="Item analisado"
+            aria-activedescendant={`${id}-${ativo}`}
+            onKeyDown={teclar}
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="vidro absolute inset-x-0 z-20 mt-2 max-h-80 origin-top overflow-y-auto rounded-2xl p-1.5 shadow-2xl shadow-black/50 outline-none"
+          >
+            {opcoes.map((opcao, indice) => (
+              <li
+                key={opcao.id ?? "todos"}
+                id={`${id}-${indice}`}
+                role="option"
+                aria-selected={indice === selecionado}
+                onClick={() => escolher(indice)}
+                onMouseMove={() => setAtivo(indice)}
+                className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${indice === ativo ? "bg-white/[0.08]" : ""} ${indice === selecionado ? "text-(--destaque)" : indice === ativo ? "text-(--texto)" : "text-(--texto-suave)"}`}
+              >
+                <span className="truncate">{opcao.nome}</span>
+                {indice === selecionado && <CheckIcon weight="bold" aria-hidden className="shrink-0" />}
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
