@@ -1,5 +1,6 @@
 /**
- * @description Categorias personalizadas do restaurante: criar, renomear, arrastar para ordenar e excluir.
+ * @description Categorias personalizadas do restaurante (10 por página): criar, renomear, arrastar para ordenar
+ * (dentro da página) e excluir.
  */
 import { useEffect, useState } from "react";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
@@ -7,30 +8,47 @@ import { CheckIcon, DotsSixVerticalIcon, PencilSimpleIcon, PlusIcon, TagIcon, Tr
 
 import { ConfirmacaoSheet } from "@/components/ConfirmacaoSheet";
 import { PainelShell } from "@/components/PainelShell";
+import { Paginacao } from "@/components/Paginacao";
 import { EmptyState, ErrorState, LoadingState } from "@/components/UIStates";
 
-import { useCategorias } from "../hooks/useCategorias";
+import { CATEGORIAS_POR_PAGINA, useCategoriaAcoes, useCategoriasPagina } from "../hooks/useCategorias";
 import { ABAS_GESTAO } from "../navegacao";
 import type { Categoria } from "../types/gestaoCardapio";
 
 export default function CategoriasPage() {
-  const { categorias, loading, erro, refetch, criar, atualizar, excluir } = useCategorias();
+  const [page, setPage] = useState(0);
+  const { categorias, totalPages, totalElements, loading, erro, refetch } = useCategoriasPagina(page);
+  const { criar, atualizar, excluir } = useCategoriaAcoes();
   const [ordem, setOrdem] = useState<Categoria[]>([]);
   const [nova, setNova] = useState("");
   const [editando, setEditando] = useState<{ id: string; nome: string } | null>(null);
   const [excluindo, setExcluindo] = useState<Categoria | null>(null);
 
   useEffect(() => setOrdem(categorias), [categorias]);
+  // Excluiu a última categoria da última página: volta uma página.
+  useEffect(() => {
+    if (totalPages > 0 && page >= totalPages) setPage(totalPages - 1);
+  }, [page, totalPages]);
 
+  // Entra no fim da lista; abre a página onde ela caiu.
   const adicionar = () => {
     const nome = nova.trim();
     if (!nome) return;
-    criar.mutate({ nome, ordem: categorias.length }, { onSuccess: () => setNova("") });
+    criar.mutate(
+      { nome, ordem: totalElements },
+      {
+        onSuccess: () => {
+          setNova("");
+          setPage(Math.floor(totalElements / CATEGORIAS_POR_PAGINA));
+        },
+      },
+    );
   };
 
-  // Ao soltar, grava só as categorias cuja posição mudou.
+  // Ao soltar, grava só as categorias cuja posição mudou. Arrastar vale dentro da página: a posição soma as anteriores.
   const salvarOrdem = () => {
-    ordem.forEach((categoria, posicao) => {
+    ordem.forEach((categoria, indice) => {
+      const posicao = page * CATEGORIAS_POR_PAGINA + indice;
       if (categoria.ordem !== posicao) atualizar.mutate({ id: categoria.id, payload: { nome: categoria.nome, ordem: posicao } });
     });
   };
@@ -129,6 +147,8 @@ export default function CategoriasPage() {
           </AnimatePresence>
         </Reorder.Group>
       )}
+
+      <Paginacao page={page} totalPages={totalPages} onChange={setPage} className="mt-6 lg:max-w-2xl" />
 
       <ConfirmacaoSheet
         isOpen={Boolean(excluindo)}

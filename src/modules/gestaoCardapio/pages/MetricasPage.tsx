@@ -1,20 +1,24 @@
 /**
  * @description Métricas do restaurante: tempo gasto em cada item, mais curtidos ("pedidos"), quase pedidos
- * (curtiu e desfez) e os dias/horários com mais curtidas. Um único filtro no topo vale para a tela toda:
- * o período recorta tudo; o item destaca o prato nos rankings e recorta o mapa de horários.
+ * (curtiu e desfez) e os dias/horários com mais curtidas. O filtro do topo vale para a tela toda: o período recorta
+ * tudo; o item destaca o prato nos rankings e recorta o mapa de horários. Cada ranking tem a própria categoria,
+ * ordem e paginação (10 por página).
  */
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CaretDownIcon, CheckIcon, ClockIcon, EyeIcon, HeartBreakIcon, HeartIcon } from "@phosphor-icons/react";
 
 import { PainelShell } from "@/components/PainelShell";
+import { Paginacao } from "@/components/Paginacao";
 import { ErrorState, LoadingState } from "@/components/UIStates";
 
 import { BarrasRanking } from "../components/BarrasRanking";
 import { MapaCalorHorarios } from "../components/MapaCalorHorarios";
+import { useCategorias } from "../hooks/useCategorias";
 import { useItensCardapio } from "../hooks/useItensCardapio";
-import { useMetricas } from "../hooks/useMetricas";
+import { useMetricas, useRankingMetrica } from "../hooks/useMetricas";
 import { ABAS_GESTAO } from "../navegacao";
+import type { OrdemRanking, TipoRanking } from "../types/gestaoCardapio";
 import { formatarContagem, formatarDuracao } from "../utils/formatarDuracao";
 
 const PERIODOS = [
@@ -23,16 +27,27 @@ const PERIODOS = [
   { dias: 90, rotulo: "90 dias" },
 ];
 
+const ORDENS: Opcao<OrdemRanking>[] = [
+  { id: "MAIOR", nome: "Mais → menos" },
+  { id: "MENOR", nome: "Menos → mais" },
+  { id: "NOME", nome: "A → Z" },
+];
+
 const surgir = {
   oculto: { opacity: 0, y: 18 },
   visivel: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.55, ease: [0.22, 1, 0.36, 1] as const } }),
 };
 
+type Opcao<T> = { id: T; nome: string };
+
 export default function MetricasPage() {
   const [dias, setDias] = useState(30);
   const [itemId, setItemId] = useState<string | null>(null);
   const { itens } = useItensCardapio();
+  const { categorias } = useCategorias();
   const { metricas, loading, atualizando, erro, refetch } = useMetricas(dias, itemId);
+  const opcoesCategoria: Opcao<string | null>[] = [{ id: null, nome: "Todas as categorias" }, ...categorias];
+  const ranking = { dias, categorias: opcoesCategoria, destaqueId: itemId };
 
   return (
     <PainelShell titulo="Métricas" abas={ABAS_GESTAO}>
@@ -53,7 +68,7 @@ export default function MetricasPage() {
             </button>
           ))}
         </div>
-        <SeletorItem itens={itens} valor={itemId} onChange={setItemId} />
+        <Seletor rotulo="Item analisado" opcoes={[{ id: null, nome: "Todos os itens" }, ...itens]} valor={itemId} onChange={setItemId} />
       </div>
 
       {loading ? (
@@ -61,8 +76,8 @@ export default function MetricasPage() {
       ) : erro || !metricas ? (
         <ErrorState mensagem={erro ?? "Não foi possível carregar as métricas."} onRetry={() => refetch()} />
       ) : (
-        <div className={`grid gap-4 transition-opacity duration-300 lg:grid-cols-2 ${atualizando ? "opacity-60" : "opacity-100"}`}>
-          <div className="grid grid-cols-2 gap-3 lg:col-span-2 lg:grid-cols-4">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className={`grid grid-cols-2 gap-3 transition-opacity duration-300 lg:col-span-2 lg:grid-cols-4 ${atualizando ? "opacity-60" : "opacity-100"}`}>
             <Tile indice={0} icone={<HeartIcon weight="fill" aria-hidden />} rotulo="Curtidas (pedidos)" valor={formatarContagem(metricas.resumo.curtidas)} />
             <Tile indice={1} icone={<HeartBreakIcon weight="fill" aria-hidden />} rotulo="Quase pedidos" valor={formatarContagem(metricas.resumo.quasePedidos)} />
             <Tile indice={2} icone={<EyeIcon weight="fill" aria-hidden />} rotulo="Visualizações" valor={formatarContagem(metricas.resumo.visualizacoes)} />
@@ -70,57 +85,138 @@ export default function MetricasPage() {
           </div>
 
           <Cartao indice={4} largo titulo="Dias e horários mais pedidos" subtitulo={itemId ? "Curtidas do item selecionado" : "Curtidas de todos os itens"}>
-            <MapaCalorHorarios dados={metricas.curtidasPorHorario} />
+            <div className={`transition-opacity duration-300 ${atualizando ? "opacity-60" : "opacity-100"}`}>
+              <MapaCalorHorarios dados={metricas.curtidasPorHorario} />
+            </div>
           </Cartao>
 
-          <Cartao indice={5} titulo="Mais curtidos" subtitulo="Curtidas que ficaram na aba Curtidos">
-            <BarrasRanking
-              cor="var(--destaque)"
-              destaqueId={itemId}
-              vazio="Nenhuma curtida no período."
-              linhas={metricas.maisCurtidos.map((m) => ({ id: m.itemId, rotulo: m.nome, valor: m.total, valorFormatado: formatarContagem(m.total) }))}
-            />
-          </Cartao>
-
-          <Cartao indice={6} titulo="Quase pedidos" subtitulo="Curtidos e depois removidos — bons candidatos a ajuste de preço ou foto">
-            <BarrasRanking
-              cor="var(--destaque-2)"
-              destaqueId={itemId}
-              vazio="Ninguém desistiu de um prato no período."
-              linhas={metricas.quasePedidos.map((m) => ({ id: m.itemId, rotulo: m.nome, valor: m.total, valorFormatado: formatarContagem(m.total) }))}
-            />
-          </Cartao>
-
-          <Cartao indice={7} largo titulo="Tempo de atenção por item" subtitulo="Tempo médio com o prato na tela, por visualização">
-            <BarrasRanking
-              cor="var(--destaque)"
-              destaqueId={itemId}
-              vazio="Sem visualizações no período."
-              linhas={[...metricas.tempoPorItem]
-                .sort((a, b) => b.tempoMedioMs - a.tempoMedioMs)
-                .map((t) => ({
-                  id: t.itemId,
-                  rotulo: t.nome,
-                  valor: t.tempoMedioMs,
-                  valorFormatado: formatarDuracao(t.tempoMedioMs),
-                  detalhe: `${formatarContagem(t.visualizacoes)} visualizações · ${formatarDuracao(t.tempoTotalMs)} no total`,
-                }))}
-            />
-          </Cartao>
+          <CartaoRanking
+            {...ranking}
+            indice={5}
+            tipo="CURTIDOS"
+            titulo="Mais curtidos"
+            subtitulo="Curtidas que ficaram na aba Curtidos"
+            cor="var(--destaque)"
+            vazio="Nenhuma curtida no período."
+          />
+          <CartaoRanking
+            {...ranking}
+            indice={6}
+            tipo="QUASE_PEDIDOS"
+            titulo="Quase pedidos"
+            subtitulo="Curtidos e depois removidos — bons candidatos a ajuste de preço ou foto"
+            cor="var(--destaque-2)"
+            vazio="Ninguém desistiu de um prato no período."
+          />
+          <CartaoRanking
+            {...ranking}
+            indice={7}
+            largo
+            tipo="TEMPO"
+            titulo="Tempo de atenção por item"
+            subtitulo="Tempo médio com o prato na tela, por visualização"
+            cor="var(--destaque)"
+            vazio="Nenhum item nesta categoria."
+          />
         </div>
       )}
     </PainelShell>
   );
 }
 
+type CartaoRankingProps = {
+  indice: number;
+  largo?: boolean;
+  tipo: TipoRanking;
+  titulo: string;
+  subtitulo: string;
+  cor: string;
+  vazio: string;
+  dias: number;
+  categorias: Opcao<string | null>[];
+  destaqueId: string | null;
+};
+
+function CartaoRanking({ indice, largo, tipo, titulo, subtitulo, cor, vazio, dias, categorias, destaqueId }: CartaoRankingProps) {
+  const [categoriaId, setCategoriaId] = useState<string | null>(null);
+  const [ordem, setOrdem] = useState<OrdemRanking>("MAIOR");
+  const [page, setPage] = useState(0);
+  // Outro período: volta à primeira página (as seguintes podem nem existir mais).
+  const [diasAnteriores, setDiasAnteriores] = useState(dias);
+  if (dias !== diasAnteriores) {
+    setDiasAnteriores(dias);
+    setPage(0);
+  }
+  const { linhas, totalPages, loading, atualizando, erro, refetch } = useRankingMetrica({ tipo, dias, categoriaId, ordem, page });
+
+  return (
+    <Cartao indice={indice} largo={largo} titulo={titulo} subtitulo={subtitulo}>
+      <div className="mb-4 flex gap-2">
+        <Seletor
+          rotulo={`Categoria de ${titulo.toLowerCase()}`}
+          opcoes={categorias}
+          valor={categoriaId}
+          onChange={(id) => {
+            setCategoriaId(id);
+            setPage(0);
+          }}
+          className="min-w-0 flex-1 sm:max-w-64"
+        />
+        <Seletor
+          rotulo={`Ordem de ${titulo.toLowerCase()}`}
+          opcoes={ORDENS}
+          valor={ordem}
+          onChange={(nova) => {
+            setOrdem(nova);
+            setPage(0);
+          }}
+          className="w-40 shrink-0"
+        />
+      </div>
+      {loading ? (
+        <p className="py-6 text-center text-sm text-(--texto-fraco)">Carregando…</p>
+      ) : erro ? (
+        <ErrorState mensagem={erro} onRetry={() => refetch()} />
+      ) : (
+        <div className={`transition-opacity duration-300 ${atualizando ? "opacity-60" : "opacity-100"}`}>
+          <BarrasRanking
+            cor={cor}
+            destaqueId={destaqueId}
+            vazio={vazio}
+            linhas={linhas.map((linha) => ({
+              id: linha.itemId,
+              rotulo: linha.nome,
+              valor: linha.valor,
+              ...(tipo === "TEMPO"
+                ? {
+                    valorFormatado: formatarDuracao(linha.valor),
+                    detalhe: `${formatarContagem(linha.visualizacoes ?? 0)} visualizações · ${formatarDuracao(linha.tempoTotalMs ?? 0)} no total`,
+                  }
+                : { valorFormatado: formatarContagem(linha.valor) }),
+            }))}
+          />
+        </div>
+      )}
+      <Paginacao page={page} totalPages={totalPages} onChange={setPage} className="mt-4" />
+    </Cartao>
+  );
+}
+
+type SeletorProps<T> = {
+  rotulo: string;
+  opcoes: Opcao<T>[];
+  valor: T;
+  onChange: (id: T) => void;
+  className?: string;
+};
+
 /** Lista própria em vez de `<select>`: o popup nativo ignora o tema escuro e abre branco no Windows. */
-function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: string }[]; valor: string | null; onChange: (id: string | null) => void }) {
+function Seletor<T extends string | null>({ rotulo, opcoes, valor, onChange, className = "sm:w-64" }: SeletorProps<T>) {
   const id = useId();
   const botaoRef = useRef<HTMLButtonElement>(null);
   const listaRef = useRef<HTMLUListElement>(null);
   const [aberto, setAberto] = useState(false);
   const [ativo, setAtivo] = useState(0);
-  const opcoes: { id: string | null; nome: string }[] = [{ id: null, nome: "Todos os itens" }, ...itens];
   const selecionado = Math.max(0, opcoes.findIndex((opcao) => opcao.id === valor));
 
   useEffect(() => {
@@ -155,7 +251,7 @@ function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: st
 
   return (
     // Fecha ao sair com Tab ou clicar fora (o foco vai para fora do contêiner).
-    <div className="relative sm:w-64" onBlur={(evento) => !evento.currentTarget.contains(evento.relatedTarget) && setAberto(false)}>
+    <div className={`relative ${className}`} onBlur={(evento) => !evento.currentTarget.contains(evento.relatedTarget) && setAberto(false)}>
       <button
         ref={botaoRef}
         type="button"
@@ -168,10 +264,10 @@ function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: st
         aria-haspopup="listbox"
         aria-expanded={aberto}
         aria-controls={`${id}-lista`}
-        aria-label={`Item analisado: ${opcoes[selecionado].nome}`}
+        aria-label={`${rotulo}: ${opcoes[selecionado]?.nome ?? ""}`}
         className="flex w-full items-center justify-between gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-sm ring-1 ring-white/10 transition outline-none hover:bg-white/[0.09] focus-visible:ring-2 focus-visible:ring-(--destaque)/70"
       >
-        <span className="truncate">{opcoes[selecionado].nome}</span>
+        <span className="truncate">{opcoes[selecionado]?.nome}</span>
         <CaretDownIcon aria-hidden className={`shrink-0 text-(--texto-suave) transition-transform ${aberto ? "rotate-180" : ""}`} />
       </button>
       <AnimatePresence>
@@ -181,7 +277,7 @@ function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: st
             id={`${id}-lista`}
             role="listbox"
             tabIndex={-1}
-            aria-label="Item analisado"
+            aria-label={rotulo}
             aria-activedescendant={`${id}-${ativo}`}
             onKeyDown={teclar}
             initial={{ opacity: 0, y: -6, scale: 0.98 }}
@@ -192,7 +288,7 @@ function SeletorItem({ itens, valor, onChange }: { itens: { id: string; nome: st
           >
             {opcoes.map((opcao, indice) => (
               <li
-                key={opcao.id ?? "todos"}
+                key={opcao.id ?? ""}
                 id={`${id}-${indice}`}
                 role="option"
                 aria-selected={indice === selecionado}

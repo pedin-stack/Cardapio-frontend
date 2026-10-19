@@ -1,16 +1,18 @@
 /**
- * @description Itens do cardápio (lista e detalhe). Enquanto algum vídeo está PROCESSANDO, refaz a consulta
- * a cada 5 s para o status virar PRONTO sozinho na tela.
+ * @description Itens do cardápio (lista completa, página e detalhe). Enquanto algum vídeo está PROCESSANDO, refaz a
+ * consulta a cada 5 s para o status virar PRONTO sozinho na tela.
  */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 
-import { atualizarItem, buscarItem, criarItem, excluirItem, listarItens } from "../services/itemCardapioService";
+import { atualizarItem, buscarItem, criarItem, excluirItem, listarItens, listarItensPagina } from "../services/itemCardapioService";
 import type { ItemCardapio, ItemCardapioPayload } from "../types/gestaoCardapio";
 
 export const CHAVE_ITENS = ["itens-cardapio"] as const;
 const INTERVALO_STATUS_VIDEO_MS = 5_000;
+/** 7 linhas da grade de 3 colunas. */
+const POR_PAGINA = 21;
 
 const processando = (itens: ItemCardapio[] | undefined) => Boolean(itens?.some((item) => item.video.status === "PROCESSANDO"));
 
@@ -23,6 +25,24 @@ export function useItensCardapio() {
   return {
     itens: query.data ?? [],
     loading: query.isPending,
+    erro: query.error ? mensagemSeguraDeErro(query.error, "Não foi possível carregar os itens.") : null,
+    refetch: query.refetch,
+  };
+}
+
+export function useItensCardapioPagina(categoriaIds: string[], page: number) {
+  const params = { categoriaIds, page, size: POR_PAGINA };
+  const query = useQuery({
+    queryKey: [...CHAVE_ITENS, "pagina", params],
+    queryFn: () => listarItensPagina(params),
+    placeholderData: keepPreviousData,
+    refetchInterval: (q) => (processando(q.state.data?.content) ? INTERVALO_STATUS_VIDEO_MS : false),
+  });
+  return {
+    itens: query.data?.content ?? [],
+    totalPages: query.data?.totalPages ?? 0,
+    loading: query.isPending,
+    atualizando: query.isFetching && !query.isPending,
     erro: query.error ? mensagemSeguraDeErro(query.error, "Não foi possível carregar os itens.") : null,
     refetch: query.refetch,
   };

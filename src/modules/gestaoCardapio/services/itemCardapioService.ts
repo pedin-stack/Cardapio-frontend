@@ -2,6 +2,7 @@
  * @description Espelha `ItemCardapioController` (/api/v1/cardapio/itens).
  */
 import { api } from "@/api/api";
+import type { Pagina } from "@/types/api";
 
 import type { ItemCardapio, ItemCardapioPayload } from "../types/gestaoCardapio";
 
@@ -10,6 +11,15 @@ const ITEM_API = "/api/v1/cardapio/itens";
 /** GET — CARDAPIO_ITEM_VISUALIZAR_PROPRIOS. Ativos e inativos, na ordem do feed. */
 export async function listarItens(): Promise<ItemCardapio[]> {
   const { data } = await api.get<ItemCardapio[]>(ITEM_API);
+  return data;
+}
+
+/** GET /pagina?categoriaIds=a,b&page&size — CARDAPIO_ITEM_VISUALIZAR_PROPRIOS. Sem categorias = todos. */
+export async function listarItensPagina(params: { categoriaIds: string[]; page: number; size: number }): Promise<Pagina<ItemCardapio>> {
+  const { data } = await api.get<Pagina<ItemCardapio>>(`${ITEM_API}/pagina`, {
+    // Separado por vírgula: o axios mandaria `categoriaIds[]=`, que o Spring não lê.
+    params: { categoriaIds: params.categoriaIds.join(",") || undefined, page: params.page, size: params.size },
+  });
   return data;
 }
 

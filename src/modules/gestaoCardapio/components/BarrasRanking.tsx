@@ -23,7 +23,8 @@ type BarrasRankingProps = {
 
 export function BarrasRanking({ linhas, cor, destaqueId, vazio }: BarrasRankingProps) {
   const maximo = Math.max(...linhas.map((linha) => linha.valor), 0);
-  if (linhas.length === 0 || maximo === 0) {
+  // Linhas zeradas ainda aparecem: em "menos → mais", os itens que ninguém viu são a resposta.
+  if (linhas.length === 0) {
     return <p className="py-6 text-center text-sm text-(--texto-fraco)">{vazio}</p>;
   }
 
@@ -31,7 +32,7 @@ export function BarrasRanking({ linhas, cor, destaqueId, vazio }: BarrasRankingP
     <ol className="flex flex-col gap-3">
       {linhas.map((linha, i) => {
         const esmaecido = Boolean(destaqueId) && linha.id !== destaqueId;
-        const largura = `${Math.max((linha.valor / maximo) * 100, linha.valor > 0 ? 2 : 0)}%`;
+        const largura = linha.valor > 0 ? `${Math.max((linha.valor / maximo) * 100, 2)}%` : "0%";
         return (
           <li
             key={linha.id}

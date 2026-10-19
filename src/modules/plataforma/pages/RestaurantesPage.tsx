@@ -5,10 +5,11 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowSquareOutIcon, CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon, PencilSimpleIcon, PlusIcon, StorefrontIcon } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon, MagnifyingGlassIcon, PencilSimpleIcon, PlusIcon, StorefrontIcon } from "@phosphor-icons/react";
 
 import { ConfirmacaoSheet } from "@/components/ConfirmacaoSheet";
 import { PainelShell } from "@/components/PainelShell";
+import { Paginacao } from "@/components/Paginacao";
 import { ToggleSwitch } from "@/components/ToggleSwitch";
 import { EmptyState, ErrorState, LoadingState } from "@/components/UIStates";
 
@@ -110,19 +111,7 @@ export default function RestaurantesPage() {
         </ul>
       )}
 
-      {totalPages > 1 && (
-        <nav aria-label="Paginação" className="mt-6 flex items-center justify-center gap-3 text-sm">
-          <button type="button" onClick={() => irPara(page - 1)} disabled={page === 0} aria-label="Página anterior" className="grid size-9 place-items-center rounded-full bg-white/8 disabled:opacity-30">
-            <CaretLeftIcon size={16} aria-hidden />
-          </button>
-          <span className="text-(--texto-suave) tabular-nums">
-            {page + 1} de {totalPages}
-          </span>
-          <button type="button" onClick={() => irPara(page + 1)} disabled={page + 1 >= totalPages} aria-label="Próxima página" className="grid size-9 place-items-center rounded-full bg-white/8 disabled:opacity-30">
-            <CaretRightIcon size={16} aria-hidden />
-          </button>
-        </nav>
-      )}
+      <Paginacao page={page} totalPages={totalPages} onChange={irPara} />
 
       <motion.div
         initial={{ scale: 0 }}

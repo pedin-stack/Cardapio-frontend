@@ -84,9 +84,18 @@ export type Metricas = {
     curtidas: number;
     quasePedidos: number;
   };
-  tempoPorItem: { itemId: string; nome: string; visualizacoes: number; tempoTotalMs: number; tempoMedioMs: number }[];
-  maisCurtidos: { itemId: string; nome: string; total: number }[];
-  quasePedidos: { itemId: string; nome: string; total: number }[];
   /** diaSemana ISO: 1 = segunda … 7 = domingo. */
   curtidasPorHorario: { diaSemana: number; hora: number; total: number }[];
+};
+
+export type TipoRanking = "CURTIDOS" | "QUASE_PEDIDOS" | "TEMPO";
+export type OrdemRanking = "MAIOR" | "MENOR" | "NOME";
+
+/** `RankingItemResponseDTO`. Em TEMPO, `valor` é o tempo médio (ms) e vêm visualizações e tempo total. */
+export type RankingItem = {
+  itemId: string;
+  nome: string;
+  valor: number;
+  visualizacoes?: number;
+  tempoTotalMs?: number;
 };
