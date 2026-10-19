@@ -1,7 +1,8 @@
 /**
- * @description Barra de categorias em vidro fosco com indicador que desliza entre os chips (layoutId). Sem "Tudo":
- * o feed mostra uma categoria por vez e o cardápio inteiro fica na aba Explorar.
+ * @description Barra de categorias em vidro fosco com indicador que desliza entre os chips (layoutId). A categoria
+ * ativa acompanha a rolagem (feed e lista) e a barra rola sozinha para deixar o chip ativo à vista.
  */
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 import type { CategoriaPublica } from "../types/cardapioPublico";
@@ -14,6 +15,18 @@ type ChipsCategoriasProps = {
 };
 
 export function ChipsCategorias({ categorias, selecionada, onSelecionar, visivel }: ChipsCategoriasProps) {
+  const barra = useRef<HTMLUListElement>(null);
+
+  // Centraliza o chip ativo. scrollBy na própria barra (e não scrollIntoView, que também rolaria o feed/lista).
+  useEffect(() => {
+    const lista = barra.current;
+    const chip = lista?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!lista || !chip) return;
+    const caixa = lista.getBoundingClientRect();
+    const alvo = chip.getBoundingClientRect();
+    lista.scrollBy({ left: alvo.left - caixa.left - (caixa.width - alvo.width) / 2, behavior: "smooth" });
+  }, [selecionada]);
+
   return (
     // A posição vem do pai (abaixo do cabeçalho). Escondida, some para trás dele e não intercepta o toque.
     <motion.nav
@@ -24,7 +37,8 @@ export function ChipsCategorias({ categorias, selecionada, onSelecionar, visivel
       transition={{ type: "spring", stiffness: 300, damping: 32 }}
       className={`rounded-full vidro p-1 ${visivel ? "pointer-events-auto" : "pointer-events-none"}`}
     >
-      <ul className="sem-scrollbar flex gap-1 overflow-x-auto">
+      {/* layoutScroll: o indicador anima certo mesmo com a barra rolando. */}
+      <motion.ul ref={barra} layoutScroll className="sem-scrollbar flex gap-1 overflow-x-auto">
         {categorias.map((opcao) => {
           const ativa = selecionada === opcao.id;
           return (
@@ -47,7 +61,7 @@ export function ChipsCategorias({ categorias, selecionada, onSelecionar, visivel
             </li>
           );
         })}
-      </ul>
+      </motion.ul>
     </motion.nav>
   );
 }

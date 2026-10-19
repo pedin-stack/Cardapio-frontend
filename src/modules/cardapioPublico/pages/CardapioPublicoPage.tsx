@@ -1,6 +1,7 @@
 /**
  * @description Cardápio público: cabeçalho com a logo e as redes do restaurante → hero (vídeo de fundo) → feed
- * vertical um-prato-por-tela com vídeo HLS em janela, ou a lista com o vídeo no topo; aba Explorar (grade + busca),
+ * vertical um-prato-por-tela, contínuo (as categorias em sequência, o chip acompanhando o prato na tela), com vídeo
+ * HLS em janela, ou a lista com o vídeo no topo; aba Explorar (grade + busca),
  * curtidas como carrinho (com adicionais), identificação opcional do cliente para comentar e avaliar, rastreio de
  * tempo por item e a cor do restaurante.
  */
@@ -38,6 +39,8 @@ import { compartilharItem } from "../utils/compartilhar";
 const INDICE_HERO = -1;
 /** Categoria virtual com os mais curtidos (a API manda os ids já ordenados). */
 const MAIS_PEDIDOS: CategoriaPublica = { id: "mais-pedidos", nome: "Mais pedidos", ordem: -1 };
+/** Cards montados antes e depois do ativo; os outros ficam só com a casca (o feed contínuo passa de 200 pratos). */
+const JANELA_MONTADA = 2;
 
 export default function CardapioPublicoPage() {
   const router = useRouter();
@@ -47,8 +50,6 @@ export default function CardapioPublicoPage() {
   const { curtidos, alternar, isCurtido, quantidade, escolhas, adicionais, definirQuantidade, escolher, alternarAdicional } = useCurtidos(slug);
   const cliente = useCliente(slug);
 
-  /** Categoria escolhida nos chips; antes de escolher, a primeira do cardápio (não há "Tudo" no feed). */
-  const [categoriaEscolhida, setCategoriaEscolhida] = useState<string | null>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(INDICE_HERO);
   const [aba, setAba] = useState<Aba>("cardapio");
   const [modo, setModo] = useState<ModoCardapio>("feed");
@@ -76,16 +77,30 @@ export default function CardapioPublicoPage() {
     },
     [cardapio],
   );
-  const categoria = categoriaEscolhida ?? categoriasFeed[0]?.id ?? null;
-  const itens = useMemo(() => itensDa(categoria), [itensDa, categoria]);
-  // A lista mostra todas as categorias de uma vez, na ordem dos chips.
-  const secoesLista = useMemo<SecaoLista[]>(
+  // Lista e feed mostram as categorias em sequência, na ordem dos chips ("Mais pedidos" primeiro).
+  const secoesCardapio = useMemo<SecaoLista[]>(
     () =>
       categoriasFeed.length === 0
         ? [{ categoria: { id: "cardapio", nome: "Cardápio", ordem: 0 }, itens: cardapio?.itens ?? [] }]
         : categoriasFeed.map((c) => ({ categoria: c, itens: itensDa(c.id) })).filter((secao) => secao.itens.length > 0),
     [categoriasFeed, cardapio, itensDa],
   );
+  const categoriasDasSecoes = useMemo(() => secoesCardapio.map((secao) => secao.categoria), [secoesCardapio]);
+  /** Feed contínuo: as seções uma atrás da outra (o mesmo prato pode estar em "Mais pedidos" e na categoria dele). */
+  const feedItens = useMemo(
+    () => secoesCardapio.flatMap(({ categoria, itens }) => itens.map((item) => ({ item, categoriaId: categoria.id }))),
+    [secoesCardapio],
+  );
+  /** Categoria → índice do primeiro prato dela no feed (destino do chip e do deslize lateral). */
+  const primeiroIndice = useMemo(() => {
+    const mapa = new Map<string, number>();
+    feedItens.forEach(({ categoriaId }, indice) => {
+      if (!mapa.has(categoriaId)) mapa.set(categoriaId, indice);
+    });
+    return mapa;
+  }, [feedItens]);
+  // A categoria ativa é a do prato na tela (na capa, a primeira): os chips acompanham a rolagem, como na lista.
+  const categoriaAtiva = feedItens[indiceAtivo]?.categoriaId ?? categoriasDasSecoes[0]?.id ?? null;
   const nomeCategoria = useMemo(
     () => new Map((cardapio?.categorias ?? []).map((c) => [c.id, c.nome])),
     [cardapio],
@@ -109,7 +124,7 @@ export default function CardapioPublicoPage() {
     );
     secoes.current.forEach((secao) => observador.observe(secao));
     return () => observador.disconnect();
-  }, [itens]);
+  }, [feedItens]);
 
   const registrar = useCallback(
     (indice: number) => (elemento: HTMLElement | null) => {
@@ -123,10 +138,11 @@ export default function CardapioPublicoPage() {
     secoes.current.get(0)?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const trocarCategoria = (id: string) => {
-    setCategoriaEscolhida(id);
-    // Depois do re-render do feed filtrado, leva ao primeiro prato da categoria.
-    requestAnimationFrame(() => secoes.current.get(0)?.scrollIntoView({ behavior: "smooth" }));
+  const irParaCategoria = (categoriaId: string) => {
+    const destino = primeiroIndice.get(categoriaId);
+    if (destino === undefined) return;
+    // Longe, pula direto: rolar suave por dezenas de pratos montaria e desmontaria cada um no caminho.
+    secoes.current.get(destino)?.scrollIntoView({ behavior: Math.abs(destino - indiceAtivo) <= JANELA_MONTADA ? "smooth" : "auto" });
   };
 
   const abrirDetalhe = (item: ItemPublico, comentarios = false) => {
@@ -155,24 +171,25 @@ export default function CardapioPublicoPage() {
 
   const vizinhas = useMemo(
     () => ({
-      proxima: categoriaVizinha(categoriasFeed, categoria, 1)?.nome,
-      anterior: categoriaVizinha(categoriasFeed, categoria, -1)?.nome,
+      proxima: categoriaVizinha(categoriasDasSecoes, categoriaAtiva, 1)?.nome,
+      anterior: categoriaVizinha(categoriasDasSecoes, categoriaAtiva, -1)?.nome,
     }),
-    [categoriasFeed, categoria],
+    [categoriasDasSecoes, categoriaAtiva],
   );
 
   const deslizarParaCategoria = (direcao: 1 | -1) => {
-    const destino = categoriaVizinha(categoriasFeed, categoria, direcao);
-    if (destino) trocarCategoria(destino.id);
+    const destino = categoriaVizinha(categoriasDasSecoes, categoriaAtiva, direcao);
+    if (destino) irParaCategoria(destino.id);
   };
 
   const pausarVideos = Boolean(detalhe) || aba !== "cardapio" || modo === "lista";
   const modosVideo = useMemo(() => {
-    const comVideo = itens.flatMap((item, i) => (item.videoHlsUrl ? [i] : []));
+    const comVideo = feedItens.flatMap(({ item }, i) => (item.videoHlsUrl ? [i] : []));
     return calcularModosVideo(comVideo, indiceAtivo, pausarVideos);
-  }, [itens, indiceAtivo, pausarVideos]);
+  }, [feedItens, indiceAtivo, pausarVideos]);
 
-  const itemEmFoco = detalhe?.id ?? (aba === "cardapio" && modo === "feed" && indiceAtivo >= 0 ? (itens[indiceAtivo]?.id ?? null) : null);
+  const itemEmFoco =
+    detalhe?.id ?? (aba === "cardapio" && modo === "feed" && indiceAtivo >= 0 ? (feedItens[indiceAtivo]?.item.id ?? null) : null);
   useRastreioVisualizacao(slug, itemEmFoco);
 
   const itensCurtidos = useMemo(() => {
@@ -204,9 +221,9 @@ export default function CardapioPublicoPage() {
             {modo === "feed" && categoriasFeed.length > 0 && (
               <div className="mx-3">
                 <ChipsCategorias
-                  categorias={categoriasFeed}
-                  selecionada={categoria}
-                  onSelecionar={trocarCategoria}
+                  categorias={categoriasDasSecoes}
+                  selecionada={categoriaAtiva}
+                  onSelecionar={irParaCategoria}
                   visivel={indiceAtivo !== INDICE_HERO && aba === "cardapio"}
                 />
               </div>
@@ -224,7 +241,7 @@ export default function CardapioPublicoPage() {
               />
             </div>
 
-            {itens.length === 0 ? (
+            {feedItens.length === 0 ? (
               <section ref={registrar(0)} data-indice={0} className="grid h-svh snap-start place-items-center">
                 <EmptyState
                   icone={<MagnifyingGlassIcon size={48} weight="duotone" aria-hidden />}
@@ -233,12 +250,14 @@ export default function CardapioPublicoPage() {
                 />
               </section>
             ) : (
-              itens.map((item, indice) => (
+              feedItens.map(({ item, categoriaId }, indice) => (
                 <ItemFeedCard
-                  key={item.id}
+                  key={`${categoriaId}:${item.id}`}
                   ref={registrar(indice)}
                   item={item}
                   indice={indice}
+                  // Perto do ativo, ou com vídeo vivo na janela de vídeos (pré-carregando o próximo).
+                  vivo={Math.abs(indice - indiceAtivo) <= JANELA_MONTADA || (modosVideo.get(indice) ?? "descarregado") !== "descarregado"}
                   ativo={indice === indiceAtivo}
                   modoVideo={modosVideo.get(indice) ?? "descarregado"}
                   curtido={isCurtido(item.id)}
@@ -262,7 +281,7 @@ export default function CardapioPublicoPage() {
                 key="lista"
                 restaurante={cardapio.restaurante}
                 capaReserva={capaReserva}
-                secoes={secoesLista}
+                secoes={secoesCardapio}
                 videoAtivo={aba === "cardapio" && !detalhe}
                 onAbrir={(item) => abrirDetalhe(item)}
               />

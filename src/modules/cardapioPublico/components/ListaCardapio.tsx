@@ -3,7 +3,7 @@
  * abaixo do cabeçalho e acompanha a rolagem; cada seção lista nome, descrição, preço e foto. Fica por cima do feed,
  * que continua montado (e pausado) para a volta cair onde o cliente estava.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ForkKnifeIcon } from "@phosphor-icons/react";
@@ -17,6 +17,9 @@ import type { CategoriaPublica, ItemPublico, RestaurantePublico } from "../types
 
 export type SecaoLista = { categoria: CategoriaPublica; itens: ItemPublico[] };
 
+/** Abaixo da barra grudada: o título que chega pelo toque no chip para ~12 px dela (scroll-mt) e já conta. */
+const FOLGA_LINHA_PX = 32;
+
 type ListaCardapioProps = {
   restaurante: RestaurantePublico;
   capaReserva?: string;
@@ -26,26 +29,30 @@ type ListaCardapioProps = {
 };
 
 export function ListaCardapio({ restaurante, capaReserva, secoes, videoAtivo, onAbrir }: ListaCardapioProps) {
-  const rolagem = useRef<HTMLDivElement>(null);
+  const barra = useRef<HTMLDivElement>(null);
   const titulos = useRef(new Map<string, HTMLElement>());
+  const quadro = useRef(0);
   const [ativa, setAtiva] = useState<string | null>(secoes[0]?.categoria.id ?? null);
   const capa = restaurante.capaUrl ?? capaReserva;
 
-  // Chip ativo = a seção cujo título cruza a faixa logo abaixo da barra de categorias.
-  useEffect(() => {
-    const raiz = rolagem.current;
-    if (!raiz) return;
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        for (const entrada of entradas) {
-          if (entrada.isIntersecting) setAtiva((entrada.target as HTMLElement).dataset.categoria ?? null);
-        }
-      },
-      { root: raiz, rootMargin: "-20% 0px -70% 0px" },
-    );
-    titulos.current.forEach((titulo) => observador.observe(titulo));
-    return () => observador.disconnect();
+  // Chip ativo = a última seção cujo título já passou da linha logo abaixo da barra grudada. Pela posição, e não por
+  // "cruzou uma faixa" (IntersectionObserver): vale descendo, subindo e depois de um pulo.
+  const atualizarAtiva = useCallback(() => {
+    const linha = (barra.current?.getBoundingClientRect().bottom ?? 0) + FOLGA_LINHA_PX;
+    let atual = secoes[0]?.categoria.id ?? null;
+    for (const { categoria } of secoes) {
+      const titulo = titulos.current.get(categoria.id);
+      if (titulo && titulo.getBoundingClientRect().top <= linha) atual = categoria.id;
+    }
+    setAtiva(atual);
   }, [secoes]);
+
+  // No máximo uma conta por quadro, por mais eventos de rolagem que cheguem.
+  const aoRolar = () => {
+    cancelAnimationFrame(quadro.current);
+    quadro.current = requestAnimationFrame(atualizarAtiva);
+  };
+  useEffect(() => () => cancelAnimationFrame(quadro.current), []);
 
   const irPara = (categoriaId: string) => {
     setAtiva(categoriaId);
@@ -59,7 +66,7 @@ export function ListaCardapio({ restaurante, capaReserva, secoes, videoAtivo, on
 
   return (
     <motion.div
-      ref={rolagem}
+      onScroll={aoRolar}
       aria-label="Cardápio em lista"
       className="sem-scrollbar fixed inset-0 z-10 mx-auto max-w-[480px] overflow-y-auto overscroll-y-contain bg-(--bg) pb-32"
       initial={{ opacity: 0 }}
@@ -88,11 +95,12 @@ export function ListaCardapio({ restaurante, capaReserva, secoes, videoAtivo, on
         </div>
       </div>
 
-      {secoes.length > 1 && (
-        <div className="sticky top-[calc(env(safe-area-inset-top)+3.75rem)] z-10 px-3 py-2">
+      {/* Gruda no topo com fundo próprio, cobrindo a faixa do cabeçalho e dos chips: os pratos não aparecem por trás. */}
+      <div ref={barra} className="sticky top-0 z-10 bg-(--bg)/95 px-3 pt-[calc(env(safe-area-inset-top)+3.75rem)] pb-2 backdrop-blur-xl">
+        {secoes.length > 1 && (
           <ChipsCategorias categorias={secoes.map((secao) => secao.categoria)} selecionada={ativa} onSelecionar={irPara} visivel />
-        </div>
-      )}
+        )}
+      </div>
 
       {secoes.map(({ categoria, itens }) => (
         <section key={categoria.id} aria-labelledby={`lista-${categoria.id}`} className="px-4 pt-5">

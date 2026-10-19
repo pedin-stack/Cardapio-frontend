@@ -19,6 +19,8 @@ import type { ItemPublico } from "../types/cardapioPublico";
 type ItemFeedCardProps = {
   item: ItemPublico;
   indice: number;
+  /** Longe do card ativo: só a casca da seção (mantém a altura e o snap); o conteúdo monta quando chega perto. */
+  vivo: boolean;
   modoVideo: ModoVideo;
   ativo: boolean;
   curtido: boolean;
@@ -34,10 +36,13 @@ type ItemFeedCardProps = {
   onDeslizarAlem?: (direcao: 1 | -1) => void;
 };
 
+const CLASSE_SECAO = "relative h-svh w-full shrink-0 snap-start snap-always overflow-hidden bg-(--bg-elevado)";
+
 export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function ItemFeedCard(
   {
     item,
     indice,
+    vivo,
     modoVideo,
     ativo,
     curtido,
@@ -64,13 +69,11 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
     },
   );
 
+  // Mesma <section> nos dois casos: o React reaproveita o nó e o observador do feed continua de olho nele.
+  if (!vivo) return <section ref={ref} data-indice={indice} aria-label={item.nome} className={CLASSE_SECAO} />;
+
   return (
-    <section
-      ref={ref}
-      data-indice={indice}
-      aria-label={item.nome}
-      className="relative h-svh w-full shrink-0 snap-start snap-always overflow-hidden bg-(--bg-elevado)"
-    >
+    <section ref={ref} data-indice={indice} aria-label={item.nome} className={CLASSE_SECAO}>
       <motion.div
         className="absolute inset-0"
         animate={{ scale: ativo ? 1 : 1.06, opacity: ativo ? 1 : 0.6 }}

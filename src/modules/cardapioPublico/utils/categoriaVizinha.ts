@@ -1,7 +1,6 @@
 /**
- * @description Para onde o feed vai quando o cliente desliza além da última (ou antes da primeira) foto do prato:
- * a categoria seguinte (ou a anterior) na ordem do cardápio. O feed sempre mostra uma categoria; o cardápio
- * inteiro fica na aba Explorar.
+ * @description Para onde o feed pula quando o cliente desliza além da última (ou antes da primeira) foto do prato:
+ * o primeiro prato da categoria seguinte (ou da anterior) na ordem do cardápio.
  */
 import type { CategoriaPublica } from "../types/cardapioPublico";
 
