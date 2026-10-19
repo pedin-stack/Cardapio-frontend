@@ -8,7 +8,7 @@ const categorias = [
   { id: "c2", nome: "Bebidas", ordem: 1 },
 ];
 const item = (id: string, nome: string, categoriaIds: string[], ingredientes: string[]): ItemPublico => ({
-  id, nome, valor: 10, categoriaIds, ingredientes, especificacoes: [], imagens: [],
+  id, nome, valor: 10, categoriaIds, ingredientes, especificacoes: [], imagens: [], adicionais: [], avaliacoes: 0, comentarios: 0,
 });
 const itens = [
   item("1", "Limonada com Hortelã", ["c2"], ["Limão-siciliano", "Hortelã"]),

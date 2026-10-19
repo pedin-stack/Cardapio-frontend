@@ -15,12 +15,14 @@ type ChipsCategoriasProps = {
 
 export function ChipsCategorias({ categorias, selecionada, onSelecionar, visivel }: ChipsCategoriasProps) {
   return (
+    // A posição vem do pai (abaixo do cabeçalho). Escondida, some para trás dele e não intercepta o toque.
     <motion.nav
       aria-label="Categorias"
+      aria-hidden={!visivel}
       initial={false}
-      animate={{ y: visivel ? 0 : -80, opacity: visivel ? 1 : 0 }}
+      animate={{ y: visivel ? 0 : -24, opacity: visivel ? 1 : 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 32 }}
-      className="pointer-events-auto mx-3 mt-[calc(env(safe-area-inset-top)+0.75rem)] rounded-full vidro p-1"
+      className={`rounded-full vidro p-1 ${visivel ? "pointer-events-auto" : "pointer-events-none"}`}
     >
       <ul className="sem-scrollbar flex gap-1 overflow-x-auto">
         {categorias.map((opcao) => {

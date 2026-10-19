@@ -1,10 +1,10 @@
 /**
- * @description Espelha `ItemCardapioController` (/api/v1/cardapio/itens).
+ * @description Espelha `ItemCardapioController` (/api/v1/cardapio/itens) e as rotas do gestor no `ComentarioController`.
  */
 import { api } from "@/api/api";
 import type { Pagina } from "@/types/api";
 
-import type { ItemCardapio, ItemCardapioPayload } from "../types/gestaoCardapio";
+import type { ComentarioItem, ItemCardapio, ItemCardapioPayload } from "../types/gestaoCardapio";
 
 const ITEM_API = "/api/v1/cardapio/itens";
 
@@ -42,6 +42,17 @@ export async function atualizarItem(id: string, payload: ItemCardapioPayload): P
 }
 
 /** DELETE /item/{id} — CARDAPIO_ITEM_APAGAR. */
+/** GET /item/{id}/comentarios?page&size — CARDAPIO_ITEM_VISUALIZAR_PROPRIOS. Os mais novos primeiro. */
+export async function listarComentariosItem(itemId: string, page: number): Promise<Pagina<ComentarioItem>> {
+  const { data } = await api.get<Pagina<ComentarioItem>>(`${ITEM_API}/item/${itemId}/comentarios`, { params: { page, size: 10 } });
+  return data;
+}
+
+/** DELETE /api/v1/cardapio/comentarios/comentario/{id} — CARDAPIO_ITEM_ATUALIZAR (moderação). */
+export async function excluirComentario(id: string): Promise<void> {
+  await api.delete(`/api/v1/cardapio/comentarios/comentario/${id}`);
+}
+
 export async function excluirItem(id: string): Promise<void> {
   await api.delete(`${ITEM_API}/item/${id}`);
 }

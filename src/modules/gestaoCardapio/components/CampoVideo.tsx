@@ -1,5 +1,5 @@
 /**
- * @description Vídeo curto do item (1 por item). Valida tipo, tamanho e duração no navegador, envia o original
+ * @description Vídeo curto (1 por item, ou o fundo da capa do restaurante). Valida tipo, tamanho e duração no navegador, envia o original
  * ao storage e mostra o status da transcodificação HLS (o back corta em chunks de 2 s em 480p/720p).
  */
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ import type { ItemCardapioForm } from "../schemas/itemCardapio.schema";
 import type { StatusVideo } from "../types/gestaoCardapio";
 
 type CampoVideoProps = {
+  rotulo?: string;
   video: ItemCardapioForm["video"];
   /** Status do vídeo já salvo (o recém-enviado ainda não tem). */
   status?: StatusVideo;
@@ -25,7 +26,7 @@ type CampoVideoProps = {
 
 const TIPOS_ACEITOS = ["video/mp4", "video/quicktime", "video/webm"];
 
-export function CampoVideo({ video, status, onChange, onEnviando }: CampoVideoProps) {
+export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnviando }: CampoVideoProps) {
   const entrada = useRef<HTMLInputElement>(null);
   const [previa, setPrevia] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -70,7 +71,7 @@ export function CampoVideo({ video, status, onChange, onEnviando }: CampoVideoPr
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium text-(--texto-suave)">Vídeo</span>
+        <span className="text-sm font-medium text-(--texto-suave)">{rotulo}</span>
         {statusExibido && <StatusVideoBadge status={statusExibido} />}
         {novo && <span className="text-xs text-(--aviso)">Será processado ao salvar</span>}
       </div>

@@ -3,7 +3,7 @@
  */
 import { api } from "@/api/api";
 
-import type { MeuRestaurante } from "../types/gestaoCardapio";
+import type { AparenciaPayload, MeuRestaurante } from "../types/gestaoCardapio";
 
 const MEU_RESTAURANTE_API = "/api/v1/core/restaurantes/meu-restaurante";
 
@@ -13,8 +13,8 @@ export async function buscarMeuRestaurante(): Promise<MeuRestaurante> {
   return data;
 }
 
-/** PUT /cor-destaque — CORE_RESTAURANTE_ATUALIZAR_PROPRIO. `null` volta à cor padrão. */
-export async function atualizarCorDestaque(corDestaque: string | null): Promise<MeuRestaurante> {
-  const { data } = await api.put<MeuRestaurante>(`${MEU_RESTAURANTE_API}/cor-destaque`, { corDestaque });
+/** PUT /aparencia — CORE_RESTAURANTE_ATUALIZAR_PROPRIO. Vídeo novo volta como PROCESSANDO (vira HLS no servidor). */
+export async function atualizarAparencia(payload: AparenciaPayload): Promise<MeuRestaurante> {
+  const { data } = await api.put<MeuRestaurante>(`${MEU_RESTAURANTE_API}/aparencia`, payload);
   return data;
 }

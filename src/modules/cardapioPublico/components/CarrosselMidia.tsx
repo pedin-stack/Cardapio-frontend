@@ -139,7 +139,11 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
       )}
 
       {total > 1 && (
-        <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] flex justify-center gap-1.5" aria-hidden>
+        // No feed, abaixo do cabeçalho e da barra de categorias; no detalhe, no topo da foto.
+        <div
+          className={`pointer-events-none absolute inset-x-0 flex justify-center gap-1.5 ${arredondado ? "top-3" : "top-[calc(env(safe-area-inset-top)+7rem)]"}`}
+          aria-hidden
+        >
           {Array.from({ length: total }, (_, i) => (
             <motion.span
               key={i}

@@ -1,6 +1,6 @@
 /**
  * @description Aba "Curtidos" — o carrinho do cardápio: lista os curtidos (mais recente primeiro) com quantidade,
- * escolhas e total. Arrastar para a esquerda (ou o X) remove = descurtir.
+ * escolhas, adicionais e total. Arrastar para a esquerda (ou o X) remove = descurtir.
  */
 import Image from "next/image";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
@@ -9,21 +9,22 @@ import { ForkKnifeIcon, HeartBreakIcon, MinusIcon, PlusIcon, XIcon } from "@phos
 import { EmptyState } from "@/components/UIStates";
 import { formatarMoeda } from "@/utils/formatarMoeda";
 
-import { QUANTIDADE_MAXIMA } from "../hooks/useCurtidos";
+import { QUANTIDADE_MAXIMA, precoUnitario } from "../hooks/useCurtidos";
 import type { ItemPublico } from "../types/cardapioPublico";
 
 type AbaCurtidosProps = {
   itens: ItemPublico[];
   quantidade: (itemId: string) => number;
   escolhas: (itemId: string) => Record<string, string>;
+  adicionais: (itemId: string) => string[];
   onDefinirQuantidade: (itemId: string, quantidade: number) => void;
   onRemover: (itemId: string) => void;
   onAbrir: (item: ItemPublico) => void;
   onVoltarAoCardapio: () => void;
 };
 
-export function AbaCurtidos({ itens, quantidade, escolhas, onDefinirQuantidade, onRemover, onAbrir, onVoltarAoCardapio }: AbaCurtidosProps) {
-  const total = itens.reduce((soma, item) => soma + item.valor * quantidade(item.id), 0);
+export function AbaCurtidos({ itens, quantidade, escolhas, adicionais, onDefinirQuantidade, onRemover, onAbrir, onVoltarAoCardapio }: AbaCurtidosProps) {
+  const total = itens.reduce((soma, item) => soma + precoUnitario(item, adicionais(item.id)) * quantidade(item.id), 0);
   const unidades = itens.reduce((soma, item) => soma + quantidade(item.id), 0);
 
   return (
@@ -66,6 +67,7 @@ export function AbaCurtidos({ itens, quantidade, escolhas, onDefinirQuantidade, 
                   indice={i}
                   quantidade={quantidade(item.id)}
                   escolhas={escolhas(item.id)}
+                  adicionais={adicionais(item.id)}
                   onDefinirQuantidade={onDefinirQuantidade}
                   onRemover={onRemover}
                   onAbrir={onAbrir}
@@ -98,15 +100,19 @@ type CurtidoLinhaProps = {
   indice: number;
   quantidade: number;
   escolhas: Record<string, string>;
+  adicionais: string[];
   onDefinirQuantidade: (itemId: string, quantidade: number) => void;
   onRemover: (itemId: string) => void;
   onAbrir: (item: ItemPublico) => void;
 };
 
-function CurtidoLinha({ item, indice, quantidade, escolhas, onDefinirQuantidade, onRemover, onAbrir }: CurtidoLinhaProps) {
+function CurtidoLinha({ item, indice, quantidade, escolhas, adicionais, onDefinirQuantidade, onRemover, onAbrir }: CurtidoLinhaProps) {
   const miniatura = item.imagens[0] ?? item.videoPosterUrl;
-  // Só as escolhas de grupos que o item ainda tem (o gestor pode ter mudado as especificações).
-  const resumo = item.especificacoes.flatMap((e) => (escolhas[e.nome] ? [escolhas[e.nome]] : [])).join(" · ");
+  // Só escolhas e adicionais que o item ainda tem (o gestor pode ter mudado especificações e adicionais).
+  const resumo = [
+    ...item.especificacoes.flatMap((e) => (escolhas[e.nome] ? [escolhas[e.nome]] : [])),
+    ...item.adicionais.filter((a) => adicionais.includes(a.id)).map((a) => `+ ${a.nome}`),
+  ].join(" · ");
 
   const aoSoltar = (_: unknown, info: PanInfo) => {
     if (info.offset.x < -110 || info.velocity.x < -700) onRemover(item.id);
@@ -147,7 +153,7 @@ function CurtidoLinha({ item, indice, quantidade, escolhas, onDefinirQuantidade,
             {resumo && <p className="truncate text-xs text-(--texto-suave)">{resumo}</p>}
           </button>
           <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="text-sm text-(--destaque)">{formatarMoeda(item.valor * quantidade)}</p>
+            <p className="text-sm text-(--destaque)">{formatarMoeda(precoUnitario(item, adicionais) * quantidade)}</p>
             <Quantidade item={item} quantidade={quantidade} onDefinirQuantidade={onDefinirQuantidade} />
           </div>
         </div>

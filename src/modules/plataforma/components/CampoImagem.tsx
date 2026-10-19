@@ -15,11 +15,13 @@ type CampoImagemProps = {
   dica: string;
   valor: ArquivoEnviado | null;
   formato: "quadrado" | "paisagem";
+  /** Prévia inteira, sem cortar (logo horizontal). */
+  inteira?: boolean;
   onChange: (valor: ArquivoEnviado | null) => void;
   onEnviando: (enviando: boolean) => void;
 };
 
-export function CampoImagem({ rotulo, dica, valor, formato, onChange, onEnviando }: CampoImagemProps) {
+export function CampoImagem({ rotulo, dica, valor, formato, inteira, onChange, onEnviando }: CampoImagemProps) {
   const entrada = useRef<HTMLInputElement>(null);
   const [enviando, setEnviando] = useState(false);
   const moldura = formato === "quadrado" ? "aspect-square w-28" : "aspect-[16/10] w-full";
@@ -54,7 +56,14 @@ export function CampoImagem({ rotulo, dica, valor, formato, onChange, onEnviando
             <CircleNotchIcon size={24} className="animate-spin" aria-hidden />
           </span>
         ) : valor ? (
-          <Image src={valor.url} alt="" fill sizes="(max-width: 768px) 100vw, 600px" unoptimized={ehPreviaLocal(valor.url)} className="object-cover" />
+          <Image
+            src={valor.url}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 600px"
+            unoptimized={ehPreviaLocal(valor.url)}
+            className={inteira ? "object-contain p-4" : "object-cover"}
+          />
         ) : (
           <span className="absolute inset-0 flex flex-col items-center justify-center gap-1">
             <ImageIcon size={26} aria-hidden />

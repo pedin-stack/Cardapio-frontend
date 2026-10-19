@@ -1,7 +1,8 @@
 /**
  * @description Aba "Curtidos" (o carrinho do cardápio). O navegador é a fonte da verdade da UI
  * (localStorage por restaurante); a API recebe cada curtir/descurtir para as métricas. Atualização otimista
- * com rollback se a API recusar. Quantidade e especificações escolhidas ficam só no navegador (são para o garçom).
+ * com rollback se a API recusar. Quantidade, especificações e adicionais escolhidos ficam só no navegador
+ * (são para o garçom).
  */
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -9,6 +10,7 @@ import { toast } from "react-toastify";
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 
 import { curtirItem, descurtirItem } from "../services/cardapioPublicoService";
+import type { ItemPublico } from "../types/cardapioPublico";
 
 const chave = (slug: string) => `cardapio-curtidos:${slug}`;
 /** Quantidade e escolhas ficam numa chave à parte: a lista antiga continua válida nos navegadores. */
@@ -16,8 +18,13 @@ const chaveDetalhes = (slug: string) => `cardapio-curtidos-detalhes:${slug}`;
 
 export const QUANTIDADE_MAXIMA = 99;
 
-/** Por item: quantidade pedida e a opção escolhida em cada especificação (grupo → opção). */
-export type DetalheCurtido = { quantidade: number; escolhas: Record<string, string> };
+/** Por item: quantidade pedida, a opção escolhida em cada especificação (grupo → opção) e os adicionais marcados. */
+export type DetalheCurtido = { quantidade: number; escolhas: Record<string, string>; adicionais?: string[] };
+
+/** Valor de uma unidade com os adicionais marcados que o item ainda oferece (o gestor pode ter mudado). */
+export function precoUnitario(item: ItemPublico, adicionalIds: string[]): number {
+  return item.adicionais.reduce((total, adicional) => (adicionalIds.includes(adicional.id) ? total + adicional.valor : total), item.valor);
+}
 
 function ler(slug: string): string[] {
   try {
@@ -113,13 +120,24 @@ export function useCurtidos(slug: string | undefined) {
     [atualizarDetalhe],
   );
 
+  const alternarAdicional = useCallback(
+    (itemId: string, adicionalId: string) =>
+      atualizarDetalhe(itemId, (atual) => {
+        const marcados = atual.adicionais ?? [];
+        return { ...atual, adicionais: marcados.includes(adicionalId) ? marcados.filter((id) => id !== adicionalId) : [...marcados, adicionalId] };
+      }),
+    [atualizarDetalhe],
+  );
+
   return {
     curtidos,
     alternar,
     isCurtido: (itemId: string) => curtidos.includes(itemId),
     quantidade: (itemId: string) => detalhes[itemId]?.quantidade ?? 1,
     escolhas: (itemId: string) => detalhes[itemId]?.escolhas ?? {},
+    adicionais: (itemId: string) => detalhes[itemId]?.adicionais ?? [],
     definirQuantidade,
     escolher,
+    alternarAdicional,
   };
 }

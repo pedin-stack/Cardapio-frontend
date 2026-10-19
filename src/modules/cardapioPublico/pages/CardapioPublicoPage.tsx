@@ -1,6 +1,8 @@
 /**
- * @description Cardápio público (cliente, sem login): hero → feed vertical um-prato-por-tela com vídeo HLS em
- * janela, aba Explorar (grade + busca), curtidas como carrinho, rastreio de tempo por item e a cor do restaurante.
+ * @description Cardápio público: cabeçalho com a logo e as redes do restaurante → hero (vídeo de fundo) → feed
+ * vertical um-prato-por-tela com vídeo HLS em janela, ou a lista com o vídeo no topo; aba Explorar (grade + busca),
+ * curtidas como carrinho (com adicionais), identificação opcional do cliente para comentar e avaliar, rastreio de
+ * tempo por item e a cor do restaurante.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
@@ -17,15 +19,20 @@ import { variaveisDoTema } from "@/utils/cor";
 import { AbaCurtidos } from "../components/AbaCurtidos";
 import { AbaExplorar } from "../components/AbaExplorar";
 import { BarraNavegacao, type Aba } from "../components/BarraNavegacao";
+import { CabecalhoCardapio, type ModoCardapio } from "../components/CabecalhoCardapio";
 import { ChipsCategorias } from "../components/ChipsCategorias";
 import { DetalheItemSheet } from "../components/DetalheItemSheet";
 import { HeroRestaurante } from "../components/HeroRestaurante";
+import { IdentificacaoSheet } from "../components/IdentificacaoSheet";
 import { ItemFeedCard } from "../components/ItemFeedCard";
+import { ListaCardapio, type SecaoLista } from "../components/ListaCardapio";
 import { useCardapioPublico } from "../hooks/useCardapioPublico";
+import { useCliente } from "../hooks/useCliente";
 import { useCurtidos } from "../hooks/useCurtidos";
 import { useRastreioVisualizacao } from "../hooks/useRastreioVisualizacao";
 import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
 import { categoriaVizinha } from "../utils/categoriaVizinha";
+import { compartilharItem } from "../utils/compartilhar";
 
 /** Índice "virtual" do hero no feed: nenhum card ativo. */
 const INDICE_HERO = -1;
@@ -35,14 +42,18 @@ const MAIS_PEDIDOS: CategoriaPublica = { id: "mais-pedidos", nome: "Mais pedidos
 export default function CardapioPublicoPage() {
   const router = useRouter();
   const slug = typeof router.query.slug === "string" ? router.query.slug : undefined;
+  const itemDoLink = typeof router.query.item === "string" ? router.query.item : undefined;
   const { cardapio, loading, indisponivel, erro, refetch } = useCardapioPublico(slug);
-  const { curtidos, alternar, isCurtido, quantidade, escolhas, definirQuantidade, escolher } = useCurtidos(slug);
+  const { curtidos, alternar, isCurtido, quantidade, escolhas, adicionais, definirQuantidade, escolher, alternarAdicional } = useCurtidos(slug);
+  const cliente = useCliente(slug);
 
   /** Categoria escolhida nos chips; antes de escolher, a primeira do cardápio (não há "Tudo" no feed). */
   const [categoriaEscolhida, setCategoriaEscolhida] = useState<string | null>(null);
   const [indiceAtivo, setIndiceAtivo] = useState(INDICE_HERO);
   const [aba, setAba] = useState<Aba>("cardapio");
+  const [modo, setModo] = useState<ModoCardapio>("feed");
   const [detalhe, setDetalhe] = useState<ItemPublico | null>(null);
+  const [focarComentarios, setFocarComentarios] = useState(false);
   const [mudo, setMudo] = useState(true);
 
   const feed = useRef<HTMLElement>(null);
@@ -53,16 +64,28 @@ export default function CardapioPublicoPage() {
     () => (cardapio?.maisPedidos.length ? [MAIS_PEDIDOS, ...cardapio.categorias] : (cardapio?.categorias ?? [])),
     [cardapio],
   );
+  const itensDa = useCallback(
+    (categoriaId: string | null) => {
+      const todos = cardapio?.itens ?? [];
+      if (categoriaId === MAIS_PEDIDOS.id) {
+        const porId = new Map(todos.map((item) => [item.id, item]));
+        return (cardapio?.maisPedidos ?? []).map((id) => porId.get(id)).filter((item): item is ItemPublico => Boolean(item));
+      }
+      // Sem categorias no restaurante, mostra tudo.
+      return todos.filter((item) => !categoriaId || item.categoriaIds.includes(categoriaId));
+    },
+    [cardapio],
+  );
   const categoria = categoriaEscolhida ?? categoriasFeed[0]?.id ?? null;
-  // Sem categorias no restaurante, o feed mostra tudo.
-  const itens = useMemo(() => {
-    const todos = cardapio?.itens ?? [];
-    if (categoria === MAIS_PEDIDOS.id) {
-      const porId = new Map(todos.map((item) => [item.id, item]));
-      return (cardapio?.maisPedidos ?? []).map((id) => porId.get(id)).filter((item): item is ItemPublico => Boolean(item));
-    }
-    return todos.filter((item) => !categoria || item.categoriaIds.includes(categoria));
-  }, [cardapio, categoria]);
+  const itens = useMemo(() => itensDa(categoria), [itensDa, categoria]);
+  // A lista mostra todas as categorias de uma vez, na ordem dos chips.
+  const secoesLista = useMemo<SecaoLista[]>(
+    () =>
+      categoriasFeed.length === 0
+        ? [{ categoria: { id: "cardapio", nome: "Cardápio", ordem: 0 }, itens: cardapio?.itens ?? [] }]
+        : categoriasFeed.map((c) => ({ categoria: c, itens: itensDa(c.id) })).filter((secao) => secao.itens.length > 0),
+    [categoriasFeed, cardapio, itensDa],
+  );
   const nomeCategoria = useMemo(
     () => new Map((cardapio?.categorias ?? []).map((c) => [c.id, c.nome])),
     [cardapio],
@@ -106,6 +129,20 @@ export default function CardapioPublicoPage() {
     requestAnimationFrame(() => secoes.current.get(0)?.scrollIntoView({ behavior: "smooth" }));
   };
 
+  const abrirDetalhe = (item: ItemPublico, comentarios = false) => {
+    setFocarComentarios(comentarios);
+    setDetalhe(item);
+  };
+
+  // Link compartilhado (/{slug}?item={id}): abre o detalhe do prato uma vez, quando o cardápio chega.
+  const abriuLink = useRef(false);
+  useEffect(() => {
+    if (abriuLink.current || !cardapio || !itemDoLink) return;
+    abriuLink.current = true;
+    const item = cardapio.itens.find((i) => i.id === itemDoLink);
+    if (item) setDetalhe(item);
+  }, [cardapio, itemDoLink]);
+
   // Cor do restaurante: no <html> para alcançar também o que fica fora desta árvore (toasts, seleção de texto).
   const corDestaque = cardapio?.restaurante.corDestaque;
   useEffect(() => {
@@ -129,13 +166,13 @@ export default function CardapioPublicoPage() {
     if (destino) trocarCategoria(destino.id);
   };
 
-  const pausarVideos = Boolean(detalhe) || aba !== "cardapio";
+  const pausarVideos = Boolean(detalhe) || aba !== "cardapio" || modo === "lista";
   const modosVideo = useMemo(() => {
     const comVideo = itens.flatMap((item, i) => (item.videoHlsUrl ? [i] : []));
     return calcularModosVideo(comVideo, indiceAtivo, pausarVideos);
   }, [itens, indiceAtivo, pausarVideos]);
 
-  const itemEmFoco = detalhe?.id ?? (aba === "cardapio" && indiceAtivo >= 0 ? (itens[indiceAtivo]?.id ?? null) : null);
+  const itemEmFoco = detalhe?.id ?? (aba === "cardapio" && modo === "feed" && indiceAtivo >= 0 ? (itens[indiceAtivo]?.id ?? null) : null);
   useRastreioVisualizacao(slug, itemEmFoco);
 
   const itensCurtidos = useMemo(() => {
@@ -145,7 +182,12 @@ export default function CardapioPublicoPage() {
 
   if (indisponivel) return <ServicoIndisponivel />;
   if (erro) return <ErrorState mensagem={erro} onRetry={() => refetch()} />;
-  if (loading || !cardapio) return <CardapioSkeleton />;
+  if (loading || !cardapio || !slug) return <CardapioSkeleton />;
+
+  const capaReserva = cardapio.itens.find((item) => item.imagens.length > 0)?.imagens[0];
+  const compartilhar = (item: ItemPublico) => compartilharItem(item, slug, cardapio.restaurante.nome);
+  // O detalhe acompanha o cardápio recarregado (média e contagens depois de avaliar ou comentar).
+  const detalheAtual = detalhe ? (cardapio.itens.find((item) => item.id === detalhe.id) ?? detalhe) : null;
 
   return (
     <>
@@ -156,14 +198,18 @@ export default function CardapioPublicoPage() {
 
       <div className="min-h-svh bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--destaque)_12%,transparent),transparent_60%)]">
         <div className="relative mx-auto max-w-[480px] md:shadow-[0_0_120px_-20px_color-mix(in_srgb,var(--destaque)_25%,transparent)]">
+          {/* Cabeçalho e, logo abaixo dele, a barra de categorias do feed (a lista tem a própria, que gruda ao rolar). */}
           <div className="pointer-events-none fixed inset-x-0 top-0 z-20 mx-auto max-w-[480px]">
-            {categoriasFeed.length > 0 && (
-              <ChipsCategorias
-                categorias={categoriasFeed}
-                selecionada={categoria}
-                onSelecionar={trocarCategoria}
-                visivel={indiceAtivo !== INDICE_HERO && aba === "cardapio"}
-              />
+            <CabecalhoCardapio restaurante={cardapio.restaurante} modo={modo} onAlternarModo={() => setModo((m) => (m === "feed" ? "lista" : "feed"))} />
+            {modo === "feed" && categoriasFeed.length > 0 && (
+              <div className="mx-3">
+                <ChipsCategorias
+                  categorias={categoriasFeed}
+                  selecionada={categoria}
+                  onSelecionar={trocarCategoria}
+                  visivel={indiceAtivo !== INDICE_HERO && aba === "cardapio"}
+                />
+              </div>
             )}
           </div>
 
@@ -171,9 +217,8 @@ export default function CardapioPublicoPage() {
             <div ref={registrar(INDICE_HERO)} data-indice={INDICE_HERO}>
               <HeroRestaurante
                 restaurante={cardapio.restaurante}
-                totalItens={cardapio.itens.length}
-                totalCategorias={cardapio.categorias.length}
-                capaReserva={cardapio.itens.find((item) => item.imagens.length > 0)?.imagens[0]}
+                capaReserva={capaReserva}
+                videoAtivo={indiceAtivo === INDICE_HERO && !pausarVideos}
                 container={feed}
                 onComecar={irParaPrimeiroItem}
               />
@@ -200,7 +245,9 @@ export default function CardapioPublicoPage() {
                   mudo={mudo}
                   nomesCategorias={nomesDe(item)}
                   onAlternarCurtida={() => alternar(item.id)}
-                  onAbrirDetalhe={() => setDetalhe(item)}
+                  onAbrirDetalhe={() => abrirDetalhe(item)}
+                  onComentar={() => abrirDetalhe(item, true)}
+                  onCompartilhar={() => compartilhar(item)}
                   onAlternarSom={() => setMudo((m) => !m)}
                   vizinhas={vizinhas}
                   onDeslizarAlem={deslizarParaCategoria}
@@ -210,8 +257,21 @@ export default function CardapioPublicoPage() {
           </main>
 
           <AnimatePresence>
+            {modo === "lista" && (
+              <ListaCardapio
+                key="lista"
+                restaurante={cardapio.restaurante}
+                capaReserva={capaReserva}
+                secoes={secoesLista}
+                videoAtivo={aba === "cardapio" && !detalhe}
+                onAbrir={(item) => abrirDetalhe(item)}
+              />
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
             {aba === "explorar" && (
-              <AbaExplorar key="explorar" itens={cardapio.itens} categorias={cardapio.categorias} onAbrir={setDetalhe} />
+              <AbaExplorar key="explorar" itens={cardapio.itens} categorias={cardapio.categorias} onAbrir={(item) => abrirDetalhe(item)} />
             )}
             {aba === "curtidos" && (
               <AbaCurtidos
@@ -219,9 +279,10 @@ export default function CardapioPublicoPage() {
                 itens={itensCurtidos}
                 quantidade={quantidade}
                 escolhas={escolhas}
+                adicionais={adicionais}
                 onDefinirQuantidade={definirQuantidade}
                 onRemover={(id) => alternar(id)}
-                onAbrir={setDetalhe}
+                onAbrir={(item) => abrirDetalhe(item)}
                 onVoltarAoCardapio={() => setAba("cardapio")}
               />
             )}
@@ -230,14 +291,28 @@ export default function CardapioPublicoPage() {
           <BarraNavegacao aba={aba} totalCurtidos={itensCurtidos.length} onTrocar={setAba} />
 
           <DetalheItemSheet
-            item={detalhe}
-            curtido={detalhe ? isCurtido(detalhe.id) : false}
-            nomesCategorias={detalhe ? nomesDe(detalhe) : []}
+            item={detalheAtual}
+            slug={slug}
+            curtido={detalheAtual ? isCurtido(detalheAtual.id) : false}
+            nomesCategorias={detalheAtual ? nomesDe(detalheAtual) : []}
             mudo={mudo}
-            escolhas={detalhe ? escolhas(detalhe.id) : {}}
-            onEscolher={(grupo, opcao) => detalhe && escolher(detalhe.id, grupo, opcao)}
-            onAlternarCurtida={() => detalhe && alternar(detalhe.id)}
+            escolhas={detalheAtual ? escolhas(detalheAtual.id) : {}}
+            onEscolher={(grupo, opcao) => detalheAtual && escolher(detalheAtual.id, grupo, opcao)}
+            adicionais={detalheAtual ? adicionais(detalheAtual.id) : []}
+            onAlternarAdicional={(adicionalId) => detalheAtual && alternarAdicional(detalheAtual.id, adicionalId)}
+            cliente={cliente}
+            focarComentarios={focarComentarios}
+            onAlternarCurtida={() => detalheAtual && alternar(detalheAtual.id)}
+            onCompartilhar={() => detalheAtual && compartilhar(detalheAtual)}
             onClose={() => setDetalhe(null)}
+          />
+
+          {/* Por último: abre por cima do detalhe quando comentar/avaliar pede identificação. */}
+          <IdentificacaoSheet
+            aberto={cliente.pedindo || (cliente.precisaDecidir && !detalhe)}
+            formularioDireto={cliente.pedindo}
+            restaurante={cardapio.restaurante.nome}
+            cliente={cliente}
           />
         </div>
       </div>
@@ -251,10 +326,6 @@ function CardapioSkeleton() {
       <div className="mx-auto mb-4 size-24 rounded-[1.75rem] shimmer" />
       <div className="mx-auto h-10 w-3/4 rounded-full shimmer" />
       <div className="mx-auto h-4 w-1/2 rounded-full shimmer" />
-      <div className="mx-auto mt-4 flex gap-2">
-        <div className="h-6 w-20 rounded-full shimmer" />
-        <div className="h-6 w-24 rounded-full shimmer" />
-      </div>
     </div>
   );
 }

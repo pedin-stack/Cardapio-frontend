@@ -1,6 +1,6 @@
 /**
  * @description Cadastro/edição do item: nome, categorias (várias), descrição, valor, ingredientes, especificações,
- * até 8 fotos e 1 vídeo. Rota `/painel/itens/novo` cria; `/painel/itens/{id}` edita.
+ * até 8 fotos e 1 vídeo. Rota `/painel/itens/novo` cria; `/painel/itens/{id}` edita (e modera os comentários).
  */
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -20,6 +20,7 @@ import { ToggleSwitch } from "@/components/ToggleSwitch";
 import { ErrorState, LoadingState } from "@/components/UIStates";
 
 import { CampoEspecificacoes } from "../components/CampoEspecificacoes";
+import { ComentariosItem } from "../components/ComentariosItem";
 import { CampoIngredientes } from "../components/CampoIngredientes";
 import { CampoVideo } from "../components/CampoVideo";
 import { GaleriaImagens } from "../components/GaleriaImagens";
@@ -249,6 +250,8 @@ export default function ItemFormPage() {
           </div>
         </form>
       )}
+
+      {id && item && <ComentariosItem itemId={id} />}
 
       <ConfirmacaoSheet
         isOpen={confirmarExclusao}

@@ -1,10 +1,11 @@
 /**
  * @description Um prato por tela, estilo Reels: mídia de ponta a ponta, informações sobre vidro fosco e
- * trilho de ações à direita. Dois toques na mídia curtem (com o coração gigante); um toque liga/desliga o som.
+ * trilho de ações à direita (curtir, comentar, compartilhar, detalhes, som). Dois toques na mídia curtem (com o
+ * coração gigante); um toque liga/desliga o som.
  */
 import { forwardRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { HeartIcon, InfoIcon, SpeakerHighIcon, SpeakerSlashIcon } from "@phosphor-icons/react";
+import { ChatCircleIcon, HeartIcon, InfoIcon, ShareFatIcon, SpeakerHighIcon, SpeakerSlashIcon } from "@phosphor-icons/react";
 
 import type { ModoVideo } from "@/components/video/janelaVideos";
 import { useToqueDuplo } from "@/hooks/useToqueDuplo";
@@ -12,6 +13,7 @@ import { formatarMoeda } from "@/utils/formatarMoeda";
 
 import { BotaoCurtir } from "./BotaoCurtir";
 import { CarrosselMidia } from "./CarrosselMidia";
+import { MediaEstrelas } from "./Estrelas";
 import type { ItemPublico } from "../types/cardapioPublico";
 
 type ItemFeedCardProps = {
@@ -24,6 +26,8 @@ type ItemFeedCardProps = {
   nomesCategorias: string[];
   onAlternarCurtida: () => void;
   onAbrirDetalhe: () => void;
+  onComentar: () => void;
+  onCompartilhar: () => void;
   onAlternarSom: () => void;
   /** Categorias vizinhas e a troca ao deslizar além das pontas do carrossel. */
   vizinhas?: { proxima?: string; anterior?: string };
@@ -31,7 +35,22 @@ type ItemFeedCardProps = {
 };
 
 export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function ItemFeedCard(
-  { item, indice, modoVideo, ativo, curtido, mudo, nomesCategorias, onAlternarCurtida, onAbrirDetalhe, onAlternarSom, vizinhas, onDeslizarAlem },
+  {
+    item,
+    indice,
+    modoVideo,
+    ativo,
+    curtido,
+    mudo,
+    nomesCategorias,
+    onAlternarCurtida,
+    onAbrirDetalhe,
+    onComentar,
+    onCompartilhar,
+    onAlternarSom,
+    vizinhas,
+    onDeslizarAlem,
+  },
   ref,
 ) {
   const [coracao, setCoracao] = useState(0);
@@ -89,12 +108,33 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
 
       {/* Trilho de ações. */}
       <motion.div
-        className="absolute right-4 bottom-[calc(env(safe-area-inset-bottom)+9rem)] z-10 flex flex-col items-center gap-4"
+        className="absolute right-4 bottom-[calc(env(safe-area-inset-bottom)+9rem)] z-10 flex flex-col items-center gap-3"
         initial={false}
         animate={{ opacity: ativo ? 1 : 0, x: ativo ? 0 : 16 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
         <BotaoCurtir curtido={curtido} onAlternar={onAlternarCurtida} />
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.85 }}
+          onClick={onComentar}
+          aria-label={item.comentarios > 0 ? `Comentários de ${item.nome} (${item.comentarios})` : `Comentar ${item.nome}`}
+          className="flex flex-col items-center gap-0.5"
+        >
+          <span className="grid size-12 place-items-center rounded-full vidro-claro">
+            <ChatCircleIcon size={24} weight="bold" aria-hidden />
+          </span>
+          {item.comentarios > 0 && <span className="text-xs font-semibold drop-shadow-md" aria-hidden>{item.comentarios}</span>}
+        </motion.button>
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.85 }}
+          onClick={onCompartilhar}
+          aria-label={`Compartilhar ${item.nome}`}
+          className="grid size-12 place-items-center rounded-full vidro-claro"
+        >
+          <ShareFatIcon size={23} weight="bold" aria-hidden />
+        </motion.button>
         <motion.button
           type="button"
           whileTap={{ scale: 0.85 }}
@@ -137,8 +177,11 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
           )}
           <h2 className="font-display text-[1.75rem] leading-tight font-semibold text-balance drop-shadow-lg">{item.nome}</h2>
           {item.descricao && <p className="mt-1.5 line-clamp-2 text-sm text-white/80">{item.descricao}</p>}
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full gradiente-destaque px-4 py-1.5 text-base font-semibold text-(--sobre-destaque) shadow-[0_8px_30px_-6px_color-mix(in_srgb,var(--destaque)_70%,transparent)]">
-            {formatarMoeda(item.valor)}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-full gradiente-destaque px-4 py-1.5 text-base font-semibold text-(--sobre-destaque) shadow-[0_8px_30px_-6px_color-mix(in_srgb,var(--destaque)_70%,transparent)]">
+              {formatarMoeda(item.valor)}
+            </span>
+            <MediaEstrelas media={item.avaliacaoMedia} total={item.avaliacoes} className="drop-shadow-md" />
           </div>
         </button>
       </motion.div>

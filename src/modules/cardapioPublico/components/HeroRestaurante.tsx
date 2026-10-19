@@ -1,19 +1,21 @@
 /**
- * @description Abertura imersiva (hero image-first): capa em tela cheia com parallax ao rolar,
- * logo em vidro e entrada escalonada do nome.
+ * @description Abertura imersiva: capa em tela cheia (o vídeo de fundo do restaurante rodando mudo, ou a foto) com
+ * parallax ao rolar, logo em vidro e entrada escalonada do nome.
  */
 import type { RefObject } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { CaretDoubleDownIcon } from "@phosphor-icons/react";
 
+import { HlsVideo } from "@/components/video/HlsVideo";
+
 import type { RestaurantePublico } from "../types/cardapioPublico";
 
 type HeroRestauranteProps = {
   restaurante: RestaurantePublico;
-  totalItens: number;
-  totalCategorias: number;
   capaReserva?: string;
+  /** O vídeo de fundo só toca com a capa na tela (fora dela fica pausado, sem gastar bateria). */
+  videoAtivo: boolean;
   container: RefObject<HTMLElement | null>;
   onComecar: () => void;
 };
@@ -28,7 +30,7 @@ const entrada = {
   }),
 };
 
-export function HeroRestaurante({ restaurante, totalItens, totalCategorias, capaReserva, container, onComecar }: HeroRestauranteProps) {
+export function HeroRestaurante({ restaurante, capaReserva, videoAtivo, container, onComecar }: HeroRestauranteProps) {
   const { scrollY } = useScroll({ container });
   const escala = useTransform(scrollY, [0, 600], [1.08, 1.3]);
   const deslocamento = useTransform(scrollY, [0, 600], [0, 140]);
@@ -38,7 +40,15 @@ export function HeroRestaurante({ restaurante, totalItens, totalCategorias, capa
   return (
     <section className="relative h-svh w-full shrink-0 snap-start overflow-hidden" aria-label={restaurante.nome}>
       <motion.div className="absolute inset-0" style={{ scale: escala, y: deslocamento }}>
-        {capa ? (
+        {restaurante.videoHlsUrl ? (
+          <HlsVideo
+            src={restaurante.videoHlsUrl}
+            poster={restaurante.videoPosterUrl ?? capa}
+            modo={videoAtivo ? "tocar" : "pausado"}
+            mudo
+            className="size-full"
+          />
+        ) : capa ? (
           <Image src={capa} alt="" fill priority sizes="(max-width: 480px) 100vw, 480px" className="object-cover" />
         ) : (
           <div className="size-full bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--destaque)_55%,transparent),transparent_55%),radial-gradient(circle_at_80%_70%,color-mix(in_srgb,var(--destaque-2)_40%,transparent),transparent_50%),#0b0b10]" />
@@ -77,18 +87,10 @@ export function HeroRestaurante({ restaurante, totalItens, totalCategorias, capa
             {restaurante.descricao}
           </motion.p>
         )}
-        <motion.div custom={3} variants={entrada} initial="oculto" animate="visivel" className="mt-6 flex gap-2 text-xs font-medium">
-          <span className="rounded-full vidro-claro px-3 py-1">{totalItens} {totalItens === 1 ? "prato" : "pratos"}</span>
-          {totalCategorias > 0 && (
-            <span className="rounded-full vidro-claro px-3 py-1">
-              {totalCategorias} {totalCategorias === 1 ? "categoria" : "categorias"}
-            </span>
-          )}
-        </motion.div>
         <motion.button
           type="button"
           onClick={onComecar}
-          custom={4}
+          custom={3}
           variants={entrada}
           initial="oculto"
           animate="visivel"

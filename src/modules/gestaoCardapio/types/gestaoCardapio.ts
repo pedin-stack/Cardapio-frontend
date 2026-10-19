@@ -72,6 +72,46 @@ export type MeuRestaurante = {
   logoUrl?: string;
   /** Hex `#rrggbb`; ausente = cor padrão. */
   corDestaque?: string;
+  logoCabecalhoPath?: string;
+  logoCabecalhoUrl?: string;
+  /** Vídeo de fundo da capa (`VideoResponseDTO`). */
+  video: ItemCardapio["video"];
+  /** DDD + número, só dígitos. */
+  whatsapp?: string;
+  /** Usuário, sem o @. */
+  instagram?: string;
+};
+
+/** `RestauranteAparenciaRequestDTO`: `null` remove o recurso (cor padrão, sem logo, sem vídeo, sem rede). */
+export type AparenciaPayload = {
+  corDestaque: string | null;
+  logoCabecalhoPath: string | null;
+  videoCaminho: string | null;
+  whatsapp: string | null;
+  instagram: string | null;
+};
+
+/** `AdicionalResponseDTO`. */
+export type Adicional = {
+  id: string;
+  nome: string;
+  valor: number;
+  itemIds: string[];
+};
+
+/** `AdicionalRequestDTO` (o mesmo para criar e atualizar). */
+export type AdicionalPayload = {
+  nome: string;
+  valor: number;
+  itemIds: string[];
+};
+
+/** `ComentarioResponseDTO`: só o primeiro nome do autor. */
+export type ComentarioItem = {
+  id: string;
+  autor: string;
+  texto: string;
+  criadoEm: string;
 };
 
 /** `MetricasResponseDTO`. */
