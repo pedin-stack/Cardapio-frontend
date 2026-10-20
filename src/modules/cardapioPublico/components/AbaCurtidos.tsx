@@ -153,7 +153,7 @@ function CurtidoLinha({ item, indice, quantidade, escolhas, adicionais, onDefini
             {resumo && <p className="truncate text-xs text-(--texto-suave)">{resumo}</p>}
           </button>
           <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="text-sm text-(--destaque)">{formatarMoeda(precoUnitario(item, adicionais) * quantidade)}</p>
+            <p className="text-sm text-white">{formatarMoeda(precoUnitario(item, adicionais) * quantidade)}</p>
             <Quantidade item={item} quantidade={quantidade} onDefinirQuantidade={onDefinirQuantidade} />
           </div>
         </div>

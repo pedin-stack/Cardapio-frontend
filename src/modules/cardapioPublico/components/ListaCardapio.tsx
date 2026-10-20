@@ -132,7 +132,7 @@ function LinhaItem({ item, onAbrir }: { item: ItemPublico; onAbrir: (item: ItemP
           <p className="font-semibold break-words">{item.nome}</p>
           {item.descricao && <p className="mt-0.5 line-clamp-2 text-sm text-(--texto-suave)">{item.descricao}</p>}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3">
-            <span className="font-semibold text-(--destaque)">{formatarMoeda(item.valor)}</span>
+            <span className="font-semibold text-white">{formatarMoeda(item.valor)}</span>
             <MediaEstrelas media={item.avaliacaoMedia} total={item.avaliacoes} className="text-xs" />
           </div>
         </div>

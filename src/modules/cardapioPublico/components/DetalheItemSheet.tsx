@@ -109,7 +109,7 @@ export function DetalheItemSheet({
               )}
               <h3 className="font-display text-2xl leading-tight font-semibold break-words">{item.nome}</h3>
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                <p className="text-xl font-semibold text-(--destaque)">{formatarMoeda(precoUnitario(item, adicionais))}</p>
+                <p className="text-xl font-semibold text-white">{formatarMoeda(precoUnitario(item, adicionais))}</p>
                 <MediaEstrelas media={item.avaliacaoMedia} total={item.avaliacoes} />
               </div>
             </div>
@@ -181,7 +181,7 @@ export function DetalheItemSheet({
                   >
                     <input type="checkbox" checked={marcado} onChange={() => onAlternarAdicional(adicional.id)} className="size-4 accent-(--destaque)" />
                     <span className="min-w-0 flex-1 break-words">{adicional.nome}</span>
-                    <span className="shrink-0 font-semibold text-(--destaque)">+ {formatarMoeda(adicional.valor)}</span>
+                    <span className="shrink-0 font-semibold text-white">+ {formatarMoeda(adicional.valor)}</span>
                   </label>
                 );
               })}
