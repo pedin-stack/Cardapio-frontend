@@ -46,7 +46,7 @@ export default function ItensPage() {
             href={`/${usuario.restauranteSlug}`}
             target="_blank"
             aria-label="Abrir cardápio público"
-            className="grid size-10 place-items-center rounded-full bg-white/8 ring-1 ring-white/10 transition hover:bg-white/15"
+            className="grid size-10 place-items-center rounded-full bg-(--superficie-forte) ring-1 ring-(--borda) transition hover:bg-(--superficie-max)"
           >
             <ArrowSquareOutIcon size={18} weight="bold" aria-hidden />
           </Link>
@@ -76,7 +76,7 @@ export default function ItensPage() {
           icone={<TagIcon size={44} weight="duotone" aria-hidden />}
           titulo="Nenhum item nessas categorias"
           acao={
-            <button type="button" onClick={() => filtrar([])} className="rounded-full vidro-claro px-5 py-2 text-sm font-medium transition hover:bg-white/15">
+            <button type="button" onClick={() => filtrar([])} className="rounded-full vidro-claro px-5 py-2 text-sm font-medium transition hover:bg-(--superficie-max)">
               Ver todos os itens
             </button>
           }
@@ -87,7 +87,7 @@ export default function ItensPage() {
           titulo="Seu cardápio está vazio"
           descricao="Cadastre o primeiro prato com fotos e um vídeo curto."
           acao={
-            <Link href="/painel/itens/novo" className="inline-flex items-center gap-2 rounded-full gradiente-destaque px-5 py-2.5 text-sm font-semibold">
+            <Link href="/painel/itens/novo" className="inline-flex items-center gap-2 rounded-full gradiente-destaque px-5 py-2.5 text-sm font-semibold text-(--sobre-destaque)">
               <PlusIcon size={16} weight="bold" aria-hidden /> Novo item
             </Link>
           }
@@ -105,13 +105,13 @@ export default function ItensPage() {
               >
                 <Link
                   href={`/painel/itens/${item.id}`}
-                  className="group flex min-w-0 gap-3 rounded-3xl bg-white/[0.04] p-2.5 ring-1 ring-white/8 transition hover:bg-white/[0.07] hover:ring-white/15"
+                  className="group flex min-w-0 gap-3 rounded-3xl bg-(--bg-elevado) p-2.5 ring-1 ring-(--borda) transition hover:ring-(--principal)/60"
                 >
-                  <div className="relative size-20 shrink-0 overflow-hidden rounded-2xl bg-white/5">
+                  <div className="relative size-20 shrink-0 overflow-hidden rounded-2xl bg-(--superficie)">
                     {capa ? (
                       <Image src={capa} alt="" fill sizes="80px" className="object-cover transition duration-500 group-hover:scale-105" />
                     ) : (
-                      <ForkKnifeIcon size={26} className="absolute inset-0 m-auto text-white/30" aria-hidden />
+                      <ForkKnifeIcon size={26} className="absolute inset-0 m-auto text-(--texto-fraco)" aria-hidden />
                     )}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
@@ -119,11 +119,11 @@ export default function ItensPage() {
                       <p className="truncate font-semibold">{item.nome}</p>
                       {!item.ativo && <EyeSlashIcon size={16} className="shrink-0 text-(--texto-fraco)" aria-label="Oculto no cardápio" />}
                     </div>
-                    <p className="text-sm font-medium text-(--destaque)">{formatarMoeda(item.valor)}</p>
+                    <p className="text-sm font-semibold">{formatarMoeda(item.valor)}</p>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <StatusVideoBadge status={item.video.status} />
                       {item.categorias.slice(0, 2).map((categoria) => (
-                        <span key={categoria.id} className="truncate rounded-full bg-white/8 px-2 py-0.5 text-[11px] text-(--texto-suave)">
+                        <span key={categoria.id} className="truncate rounded-full bg-(--superficie-forte) px-2 py-0.5 text-[11px] text-(--texto-suave)">
                           {categoria.nome}
                         </span>
                       ))}
@@ -146,7 +146,7 @@ export default function ItensPage() {
         <Link
           href="/painel/itens/novo"
           aria-label="Novo item"
-          className="grid size-14 place-items-center rounded-full gradiente-destaque shadow-[0_12px_40px_-8px_rgba(255,107,74,0.9)] transition active:scale-90"
+          className="grid size-14 place-items-center rounded-full gradiente-destaque text-(--sobre-destaque) sombra-destaque transition active:scale-90"
         >
           <PlusIcon size={26} weight="bold" aria-hidden />
         </Link>
@@ -162,7 +162,7 @@ function Chip({ ativo, onClick, children }: { ativo: boolean; onClick: () => voi
       onClick={onClick}
       aria-pressed={ativo}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium whitespace-nowrap ring-1 transition-colors ${
-        ativo ? "bg-(--destaque-suave) text-white ring-(--destaque)/60" : "bg-white/5 text-(--texto-suave) ring-white/10 hover:text-(--texto)"
+        ativo ? "bg-(--destaque-suave) text-(--texto) ring-(--destaque)/60" : "bg-(--superficie) text-(--texto-suave) ring-(--borda) hover:text-(--texto)"
       }`}
     >
       {ativo && <CheckIcon size={14} weight="bold" aria-hidden />}

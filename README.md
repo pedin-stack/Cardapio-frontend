@@ -1,6 +1,6 @@
-# Cardápio — Front
+# MenuClip — Front
 
-Cardápio que se navega como rede social. Next.js 15 (Pages Router) · React 19 · TypeScript strict · Tailwind v4 ·
+MenuClip: o cardápio que se navega como rede social. Next.js 15 (Pages Router) · React 19 · TypeScript strict · Tailwind v4 ·
 React Query · framer-motion · hls.js. Mobile-first, dark, vidro fosco. Padrões: `conecta-frontend-blueprint.md`.
 
 ## Rodar

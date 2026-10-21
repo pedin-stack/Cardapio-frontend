@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { StorefrontIcon } from "@phosphor-icons/react";
 
 const BOLHAS = [
-  { cor: "rgba(255,107,74,0.55)", tamanho: 320, x: "-30%", y: "-20%", duracao: 14 },
-  { cor: "rgba(255,179,107,0.4)", tamanho: 260, x: "40%", y: "30%", duracao: 18 },
-  { cor: "rgba(120,90,255,0.3)", tamanho: 220, x: "-10%", y: "55%", duracao: 16 },
+  { cor: "color-mix(in srgb, var(--mc-laranja) 45%, transparent)", tamanho: 320, x: "-30%", y: "-20%", duracao: 14 },
+  { cor: "color-mix(in srgb, var(--mc-turquesa) 40%, transparent)", tamanho: 260, x: "40%", y: "30%", duracao: 18 },
+  { cor: "color-mix(in srgb, var(--mc-menta) 35%, transparent)", tamanho: 220, x: "-10%", y: "55%", duracao: 16 },
 ];
 
 type ServicoIndisponivelProps = {
@@ -54,7 +54,7 @@ export function ServicoIndisponivel({
           transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 14 }}
           className="mx-auto mt-4 grid size-14 place-items-center rounded-2xl vidro-claro"
         >
-          <StorefrontIcon size={28} weight="duotone" className="text-(--destaque)" aria-hidden />
+          <StorefrontIcon size={28} weight="duotone" className="text-(--principal-forte)" aria-hidden />
         </motion.div>
         <h1 className="mt-5 font-display text-2xl font-semibold">{titulo}</h1>
         <p className="mt-2 text-sm text-(--texto-suave)">{descricao}</p>

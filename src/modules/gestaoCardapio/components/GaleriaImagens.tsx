@@ -71,12 +71,12 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.6 }}
-                  whileDrag={{ scale: 1.08, zIndex: 10, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.8)" }}
-                  className="relative size-28 shrink-0 cursor-grab touch-pan-y overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 active:cursor-grabbing"
+                  whileDrag={{ scale: 1.08, zIndex: 10, boxShadow: "0 20px 40px -10px rgba(23,37,43,0.35)" }}
+                  className="relative size-28 shrink-0 cursor-grab touch-pan-y overflow-hidden rounded-2xl bg-(--superficie) ring-1 ring-(--borda) active:cursor-grabbing"
                 >
                   <Image src={imagem.url} alt={`Foto ${i + 1}`} fill sizes="112px" unoptimized={ehPreviaLocal(imagem.url)} className="pointer-events-none object-cover" />
                   {i === 0 && (
-                    <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase backdrop-blur">
+                    <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white font-bold tracking-wide uppercase backdrop-blur">
                       Capa
                     </span>
                   )}
@@ -84,7 +84,7 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
                     type="button"
                     onClick={() => onChange(imagens.filter((outra) => outra.caminho !== imagem.caminho))}
                     aria-label={`Remover foto ${i + 1}`}
-                    className="absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-full bg-black/60 backdrop-blur transition hover:bg-black/80"
+                    className="absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80"
                   >
                     <XIcon size={14} weight="bold" aria-hidden />
                   </button>
@@ -95,7 +95,7 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
 
           {Array.from({ length: enviando }, (_, i) => (
             <div key={`enviando-${i}`} className="grid size-28 shrink-0 place-items-center rounded-2xl shimmer" role="status" aria-label="Enviando foto">
-              <CircleNotchIcon size={22} className="animate-spin text-white/60" aria-hidden />
+              <CircleNotchIcon size={22} className="animate-spin text-(--texto-fraco)" aria-hidden />
             </div>
           ))}
 
@@ -104,7 +104,7 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
               type="button"
               whileTap={{ scale: 0.94 }}
               onClick={() => entrada.current?.click()}
-              className="flex size-28 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-white/20 text-(--texto-suave) transition hover:border-(--destaque) hover:text-white"
+              className="flex size-28 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-(--borda-forte) text-(--texto-suave) transition hover:border-(--destaque) hover:text-(--texto)"
             >
               {imagens.length === 0 ? <ImageSquareIcon size={26} aria-hidden /> : <PlusIcon size={22} weight="bold" aria-hidden />}
               <span className="text-xs">Adicionar</span>

@@ -36,6 +36,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 
+import { Logo } from "@/components/Logo";
 import { BarrasRanking, type LinhaRanking } from "@/modules/gestaoCardapio/components/BarrasRanking";
 import { MapaCalorHorarios } from "@/modules/gestaoCardapio/components/MapaCalorHorarios";
 
@@ -153,21 +154,21 @@ export default function LandingPage() {
   return (
     <div className="relative overflow-x-clip">
       <Head>
-        <title>Conheça · Cardápio</title>
+        <title>Conheça · MenuClip</title>
         <meta
           name="description"
           content="O cardápio que se navega como uma rede social: pratos em vídeo, curtir para pedir e métricas do que o cliente mais quer."
         />
       </Head>
 
-      <header className="sticky top-0 z-30 border-b border-white/5 bg-(--bg)/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-(--borda) bg-(--bg)/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3">
-          <Link href="/conheca" className="font-display text-xl font-bold texto-gradiente">
-            Cardápio
+          <Link href="/conheca">
+            <Logo className="text-2xl" />
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 rounded-full vidro-claro px-4 py-2 text-sm font-semibold transition hover:bg-white/15"
+            className="inline-flex items-center gap-2 rounded-full vidro-claro px-4 py-2 text-sm font-semibold transition hover:bg-(--superficie-max)"
           >
             <SignInIcon size={16} weight="bold" aria-hidden />
             Entrar no painel
@@ -179,13 +180,13 @@ export default function LandingPage() {
         <section className="relative">
           <motion.div
             aria-hidden
-            className="absolute -top-32 -left-24 size-96 rounded-full bg-(--destaque)/25 blur-[110px]"
+            className="absolute -top-32 -left-24 size-96 rounded-full bg-(--principal)/30 blur-[110px]"
             animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             aria-hidden
-            className="absolute top-1/3 -right-24 size-80 rounded-full bg-(--destaque-2)/15 blur-[110px]"
+            className="absolute top-1/3 -right-24 size-80 rounded-full bg-(--destaque)/20 blur-[110px]"
             animate={{ x: [0, -40, 0], y: [0, -30, 0] }}
             transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -197,7 +198,7 @@ export default function LandingPage() {
                 variants={entrada}
                 initial="oculto"
                 animate="visivel"
-                className="inline-flex items-center gap-2 rounded-full bg-(--destaque-suave) px-3 py-1 text-xs font-semibold text-(--destaque-2) ring-1 ring-(--destaque)/30"
+                className="inline-flex items-center gap-2 rounded-full bg-(--mc-menta) px-3 py-1 text-xs font-semibold text-(--principal-forte) ring-1 ring-(--principal)/40"
               >
                 Cardápio digital para restaurantes
               </motion.p>
@@ -206,9 +207,9 @@ export default function LandingPage() {
                 variants={entrada}
                 initial="oculto"
                 animate="visivel"
-                className="mt-5 font-display text-4xl leading-[1.05] font-bold tracking-tight text-balance texto-gradiente sm:text-6xl"
+                className="mt-5 font-display text-4xl leading-[1.05] font-bold tracking-tight text-balance sm:text-6xl"
               >
-                O cardápio que se navega como uma rede social
+                O cardápio que se navega como uma <span className="text-(--destaque-2)">rede social</span>
               </motion.h1>
               <motion.p custom={2} variants={entrada} initial="oculto" animate="visivel" className="mt-5 max-w-xl text-lg text-(--texto-suave)">
                 Seus pratos em fotos e vídeos, um por tela. O cliente curte o que quer pedir e você descobre o que mais chama atenção,
@@ -219,14 +220,14 @@ export default function LandingPage() {
                   href={URL_DEMO}
                   target="_blank"
                   rel="noopener"
-                  className="group inline-flex items-center gap-2 rounded-full gradiente-destaque px-6 py-3 font-semibold text-white shadow-[0_10px_30px_-10px_rgba(255,107,74,0.8)]"
+                  className="group inline-flex items-center gap-2 rounded-full gradiente-destaque px-6 py-3 font-semibold text-(--sobre-destaque) sombra-destaque"
                 >
                   Ver demonstração
                   <ArrowSquareOutIcon size={18} weight="bold" className="transition group-hover:translate-x-0.5" aria-hidden />
                 </a>
                 <a
                   href="#recursos"
-                  className="group inline-flex items-center gap-2 rounded-full vidro-claro px-6 py-3 font-semibold transition hover:bg-white/15"
+                  className="group inline-flex items-center gap-2 rounded-full vidro-claro px-6 py-3 font-semibold transition hover:bg-(--superficie-max)"
                 >
                   Ver recursos
                   <ArrowRightIcon size={18} weight="bold" className="transition group-hover:translate-x-1" aria-hidden />
@@ -234,7 +235,7 @@ export default function LandingPage() {
               </motion.div>
               <motion.ul custom={4} variants={entrada} initial="oculto" animate="visivel" className="mt-10 flex flex-wrap gap-2">
                 {DESTAQUES.map((destaque) => (
-                  <li key={destaque} className="rounded-full bg-white/[0.05] px-3 py-1.5 text-xs text-(--texto-suave) ring-1 ring-white/8">
+                  <li key={destaque} className="rounded-full bg-(--bg-elevado) px-3 py-1.5 text-xs text-(--texto-suave) ring-1 ring-(--borda)">
                     {destaque}
                   </li>
                 ))}
@@ -247,9 +248,9 @@ export default function LandingPage() {
               transition={{ delay: 0.4, duration: 1, ease: EASE }}
               className="relative hidden shrink-0 lg:block"
             >
-              <div aria-hidden className="absolute -inset-8 rounded-full bg-(--destaque)/20 blur-[80px]" />
-              <div className="relative h-[min(780px,calc(100svh-8rem))] w-[370px] rounded-[3rem] bg-black p-2.5 shadow-[0_40px_120px_-30px_rgba(255,107,74,0.6)] ring-1 ring-(--borda-forte)">
-                <div className="size-full overflow-hidden rounded-[2.5rem] bg-(--bg-elevado)">
+              <div aria-hidden className="absolute -inset-8 rounded-full bg-(--principal)/25 blur-[80px]" />
+              <div className="relative h-[min(780px,calc(100svh-8rem))] w-[370px] rounded-[3rem] bg-black p-2.5 shadow-[0_40px_120px_-30px_color-mix(in_srgb,var(--mc-grafite)_60%,transparent)] ring-1 ring-(--borda-forte)">
+                <div className="size-full overflow-hidden rounded-[2.5rem] bg-(--mc-grafite)">
                   {telaGrande && <iframe src={URL_DEMO} title="Cardápio de demonstração da Casa Jatobá" loading="lazy" className="size-full border-0" />}
                 </div>
               </div>
@@ -279,7 +280,7 @@ export default function LandingPage() {
               custom={1}
               variants={surgir}
               onViewportEnter={() => setMetricasVistas(true)}
-              className="flex flex-col gap-6 rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/8"
+              className="flex flex-col gap-6 rounded-3xl bg-(--bg-elevado) p-5 ring-1 ring-(--borda)"
             >
               <div>
                 <div className="flex items-baseline justify-between gap-3">
@@ -316,10 +317,10 @@ export default function LandingPage() {
           <ol className="mt-10 grid gap-4 md:grid-cols-3">
             {PASSOS.map(({ Icone, titulo, texto }, i) => (
               <motion.li key={titulo} {...naTela} custom={i} variants={surgir} className="relative rounded-3xl vidro p-6">
-                <span className="font-display text-5xl font-bold text-white/10" aria-hidden>
+                <span className="font-display text-5xl font-bold text-(--principal)/40" aria-hidden>
                   {i + 1}
                 </span>
-                <Icone size={26} weight="duotone" className="absolute top-6 right-6 text-(--destaque)" aria-hidden />
+                <Icone size={26} weight="duotone" className="absolute top-6 right-6 text-(--principal-forte)" aria-hidden />
                 <h3 className="mt-3 font-display text-lg font-semibold">{titulo}</h3>
                 <p className="mt-1.5 text-sm text-(--texto-suave)">{texto}</p>
               </motion.li>
@@ -332,20 +333,20 @@ export default function LandingPage() {
             {...naTela}
             custom={0}
             variants={surgir}
-            className="relative overflow-hidden rounded-[2rem] vidro px-6 py-14 text-center sm:px-12"
+            className="relative overflow-hidden rounded-[2rem] bg-(--mc-grafite) px-6 py-14 text-center text-(--mc-gelo) sm:px-12"
           >
-            <div aria-hidden className="absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-(--destaque)/30 blur-[100px]" />
-            <h2 className="relative font-display text-3xl font-bold tracking-tight text-balance texto-gradiente sm:text-4xl">
+            <div aria-hidden className="absolute -top-24 left-1/2 size-80 -translate-x-1/2 rounded-full bg-(--principal)/35 blur-[100px]" />
+            <h2 className="relative font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl">
               Veja funcionando
             </h2>
-            <p className="relative mx-auto mt-4 max-w-md text-(--texto-suave)">
+            <p className="relative mx-auto mt-4 max-w-md text-(--mc-gelo)/75">
               Abra o cardápio da Casa Jatobá, um restaurante de demonstração, e navegue como seu cliente vai navegar.
             </p>
             <a
               href={URL_DEMO}
               target="_blank"
               rel="noopener"
-              className="relative mt-8 inline-flex items-center gap-2 rounded-full gradiente-destaque px-7 py-3.5 font-semibold text-white shadow-[0_10px_30px_-10px_rgba(255,107,74,0.8)]"
+              className="relative mt-8 inline-flex items-center gap-2 rounded-full gradiente-destaque px-7 py-3.5 font-semibold text-(--sobre-destaque) sombra-destaque"
             >
               Abrir demonstração
               <ArrowSquareOutIcon size={18} weight="bold" aria-hidden />
@@ -354,10 +355,10 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-white/5">
+      <footer className="border-t border-(--borda)">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 pt-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] text-sm text-(--texto-fraco)">
-          <span>
-            <span className="font-display font-semibold texto-gradiente">Cardápio</span>: o cardápio que se navega como uma rede social.
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+            <Logo className="text-base text-(--texto)" />o cardápio que se navega como uma rede social.
           </span>
           <Link href="/login" className="transition hover:text-(--texto)">
             Entrar no painel
@@ -372,7 +373,7 @@ function Secao({ id, rotulo, titulo, texto, children }: { id?: string; rotulo: s
   return (
     <section id={id} className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 lg:py-24">
       <motion.div {...naTela} custom={0} variants={surgir} className="max-w-2xl">
-        <p className="text-xs font-semibold tracking-[0.18em] text-(--destaque) uppercase">{rotulo}</p>
+        <p className="text-xs font-semibold tracking-[0.18em] text-(--principal-forte) uppercase">{rotulo}</p>
         <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl">{titulo}</h2>
         <p className="mt-4 text-(--texto-suave)">{texto}</p>
       </motion.div>
@@ -394,8 +395,8 @@ function GradeRecursos({
     <ul className={`grid gap-4 ${colunas} ${semMargem ? "" : "mt-10"}`}>
       {recursos.map(({ Icone, titulo, texto }, i) => (
         <motion.li key={titulo} {...naTela} custom={i % 4} variants={surgir} className="rounded-3xl vidro p-5">
-          <div className="grid size-11 place-items-center rounded-2xl bg-(--destaque-suave)">
-            <Icone size={22} weight="duotone" className="text-(--destaque)" aria-hidden />
+          <div className="grid size-11 place-items-center rounded-2xl bg-(--mc-menta)">
+            <Icone size={22} weight="duotone" className="text-(--principal-forte)" aria-hidden />
           </div>
           <h3 className="mt-4 font-display text-lg font-semibold">{titulo}</h3>
           <p className="mt-1.5 text-sm text-(--texto-suave)">{texto}</p>

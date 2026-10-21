@@ -78,14 +78,14 @@ export default function CategoriasPage() {
           maxLength={60}
           placeholder="Nova categoria (ex.: Sobremesas)"
           aria-label="Nova categoria"
-          className="min-w-0 flex-1 rounded-full bg-white/[0.06] px-5 py-3 ring-1 ring-white/10 outline-none focus:ring-2 focus:ring-(--destaque)/70"
+          className="min-w-0 flex-1 rounded-full bg-(--bg-elevado) px-5 py-3 ring-1 ring-(--borda) outline-none focus:ring-2 focus:ring-(--destaque)/70"
         />
         <motion.button
           type="submit"
           whileTap={{ scale: 0.9 }}
           disabled={!nova.trim() || criar.isPending}
           aria-label="Adicionar categoria"
-          className="grid size-12 shrink-0 place-items-center rounded-full gradiente-destaque disabled:opacity-40"
+          className="grid size-12 shrink-0 place-items-center rounded-full gradiente-destaque text-(--sobre-destaque) disabled:opacity-40"
         >
           <PlusIcon size={20} weight="bold" aria-hidden />
         </motion.button>
@@ -108,8 +108,8 @@ export default function CategoriasPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -60 }}
-                whileDrag={{ scale: 1.03, boxShadow: "0 20px 40px -12px rgba(0,0,0,0.8)" }}
-                className="flex items-center gap-2 rounded-2xl bg-white/[0.05] p-2 pl-1 ring-1 ring-white/8"
+                whileDrag={{ scale: 1.03, boxShadow: "0 20px 40px -12px rgba(23,37,43,0.35)" }}
+                className="flex items-center gap-2 rounded-2xl bg-(--bg-elevado) p-2 pl-1 ring-1 ring-(--borda)"
               >
                 <DotsSixVerticalIcon size={22} className="shrink-0 cursor-grab text-(--texto-fraco) active:cursor-grabbing" aria-label="Arrastar" />
                 {editando?.id === categoria.id ? (
@@ -121,7 +121,7 @@ export default function CategoriasPage() {
                     onBlur={salvarNome}
                     maxLength={60}
                     aria-label="Nome da categoria"
-                    className="min-w-0 flex-1 rounded-xl bg-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-(--destaque)/70"
+                    className="min-w-0 flex-1 rounded-xl bg-(--superficie-forte) px-3 py-2 outline-none focus:ring-2 focus:ring-(--destaque)/70"
                   />
                 ) : (
                   <span className="min-w-0 flex-1 truncate px-1 font-medium">{categoria.nome}</span>
@@ -130,7 +130,7 @@ export default function CategoriasPage() {
                   type="button"
                   onClick={() => (editando?.id === categoria.id ? salvarNome() : setEditando({ id: categoria.id, nome: categoria.nome }))}
                   aria-label={editando?.id === categoria.id ? "Salvar nome" : `Renomear ${categoria.nome}`}
-                  className="grid size-9 place-items-center rounded-full hover:bg-white/10"
+                  className="grid size-9 place-items-center rounded-full hover:bg-(--superficie-forte)"
                 >
                   {editando?.id === categoria.id ? <CheckIcon size={16} weight="bold" aria-hidden /> : <PencilSimpleIcon size={16} aria-hidden />}
                 </button>

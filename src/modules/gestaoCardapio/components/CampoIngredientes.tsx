@@ -45,14 +45,14 @@ export function CampoIngredientes({ ingredientes, onChange, erro, rotulo = "Ingr
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
-              className="inline-flex items-center gap-1 rounded-full bg-white/10 py-1 pr-1 pl-3 text-sm"
+              className="inline-flex items-center gap-1 rounded-full bg-(--superficie-max) py-1 pr-1 pl-3 text-sm"
             >
               {ingrediente}
               <button
                 type="button"
                 onClick={() => onChange(ingredientes.filter((outro) => outro !== ingrediente))}
                 aria-label={`Remover ${ingrediente}`}
-                className="grid size-5 place-items-center rounded-full hover:bg-white/15"
+                className="grid size-5 place-items-center rounded-full hover:bg-(--borda-forte)"
               >
                 <XIcon size={11} weight="bold" aria-hidden />
               </button>

@@ -39,7 +39,7 @@ export function ComentariosItem({ itemId }: { itemId: string }) {
   const comentarios = query.data?.pages.flatMap((pagina) => pagina.content) ?? [];
 
   return (
-    <section aria-labelledby="comentarios-item" className="mt-8 flex flex-col gap-3 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8 lg:p-6">
+    <section aria-labelledby="comentarios-item" className="mt-8 flex flex-col gap-3 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda) lg:p-6">
       <h2 id="comentarios-item" className="font-display text-lg font-semibold">
         Comentários dos clientes
       </h2>
@@ -60,7 +60,7 @@ export function ComentariosItem({ itemId }: { itemId: string }) {
                 key={comentario.id}
                 layout
                 exit={{ opacity: 0, x: -60 }}
-                className="flex items-start gap-3 rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/8"
+                className="flex items-start gap-3 rounded-2xl bg-(--superficie) px-4 py-3 ring-1 ring-(--borda)"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
@@ -88,7 +88,7 @@ export function ComentariosItem({ itemId }: { itemId: string }) {
           type="button"
           onClick={() => query.fetchNextPage()}
           disabled={query.isFetchingNextPage}
-          className="self-start rounded-full px-3 py-2 text-sm font-medium text-(--destaque) disabled:opacity-50"
+          className="self-start rounded-full px-3 py-2 text-sm font-medium text-(--principal-forte) disabled:opacity-50"
         >
           {query.isFetchingNextPage ? "Carregando…" : "Ver mais comentários"}
         </button>

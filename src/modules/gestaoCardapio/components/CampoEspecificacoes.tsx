@@ -39,7 +39,7 @@ export function CampoEspecificacoes({ especificacoes, onChange, erros, erro }: C
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96 }}
-            className="flex flex-col gap-3 rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/8"
+            className="flex flex-col gap-3 rounded-2xl bg-(--superficie) p-3 ring-1 ring-(--borda)"
           >
             <div className="flex items-end gap-2">
               <InputField
@@ -76,7 +76,7 @@ export function CampoEspecificacoes({ especificacoes, onChange, erros, erro }: C
         <button
           type="button"
           onClick={() => onChange([...especificacoes, { nome: "", opcoes: [] }])}
-          className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 py-3 text-sm font-medium text-(--texto-suave) transition hover:border-white/30 hover:text-(--texto)"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-(--borda-forte) py-3 text-sm font-medium text-(--texto-suave) transition hover:border-(--principal) hover:text-(--texto)"
         >
           <PlusIcon size={16} weight="bold" aria-hidden />
           Adicionar especificação

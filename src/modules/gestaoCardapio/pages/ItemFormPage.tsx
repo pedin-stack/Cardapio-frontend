@@ -130,7 +130,7 @@ export default function ItemFormPage() {
       titulo={id ? "Editar item" : "Novo item"}
       abas={ABAS_GESTAO}
       acoes={
-        <Link href="/painel" aria-label="Voltar para os itens" className="grid size-10 place-items-center rounded-full bg-white/8 ring-1 ring-white/10">
+        <Link href="/painel" aria-label="Voltar para os itens" className="grid size-10 place-items-center rounded-full bg-(--superficie-forte) ring-1 ring-(--borda)">
           <ArrowLeftIcon size={18} weight="bold" aria-hidden />
         </Link>
       }
@@ -147,7 +147,7 @@ export default function ItemFormPage() {
             variants={secao}
             initial="oculto"
             animate="visivel"
-            className="flex flex-col gap-5 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8 lg:sticky lg:top-24 lg:row-span-2"
+            className="flex flex-col gap-5 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda) lg:sticky lg:top-24 lg:row-span-2"
           >
             <Controller
               control={control}
@@ -219,7 +219,7 @@ export default function ItemFormPage() {
               control={control}
               name="ativo"
               render={({ field }) => (
-                <div className="flex items-center justify-between gap-4 rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/8">
+                <div className="flex items-center justify-between gap-4 rounded-2xl bg-(--superficie) px-4 py-3 ring-1 ring-(--borda)">
                   <div>
                     <p className="font-medium">Visível no cardápio</p>
                     <p className="text-xs text-(--texto-fraco)">Desligue para esconder sem excluir.</p>

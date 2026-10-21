@@ -8,8 +8,8 @@ import { CircleNotchIcon } from "@phosphor-icons/react";
 type Variante = "primario" | "secundario" | "perigo";
 
 const CLASSES: Record<Variante, string> = {
-  primario: "gradiente-destaque text-white shadow-[0_10px_30px_-10px_rgba(255,107,74,0.8)]",
-  secundario: "vidro-claro text-white hover:bg-white/15",
+  primario: "gradiente-destaque text-(--sobre-destaque) sombra-destaque",
+  secundario: "vidro-claro text-(--texto) hover:bg-(--superficie-max)",
   perigo: "bg-(--perigo)/15 text-(--perigo) ring-1 ring-(--perigo)/30 hover:bg-(--perigo)/25",
 };
 

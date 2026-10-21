@@ -7,11 +7,12 @@ import Head from "next/head";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { ForkKnifeIcon, SignInIcon } from "@phosphor-icons/react";
+import { SignInIcon } from "@phosphor-icons/react";
 
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 import { rotaInicial, useAuth } from "@/auth/useAuth";
 import { Botao } from "@/components/Botao";
+import { Logo } from "@/components/Logo";
 import { InputField } from "@/components/inputs/InputField";
 
 import { loginSchema, type LoginForm } from "../schemas/login.schema";
@@ -48,17 +49,17 @@ export default function LoginPage() {
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden px-5">
       <Head>
-        <title>Entrar · Cardápio</title>
+        <title>Entrar · MenuClip</title>
       </Head>
       <motion.div
         aria-hidden
-        className="absolute -top-20 -left-20 size-80 rounded-full bg-(--destaque)/30 blur-[100px]"
+        className="absolute -top-20 -left-20 size-80 rounded-full bg-(--principal)/30 blur-[100px]"
         animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden
-        className="absolute -right-24 bottom-0 size-80 rounded-full bg-(--destaque-2)/20 blur-[100px]"
+        className="absolute -right-24 bottom-0 size-80 rounded-full bg-(--destaque)/20 blur-[100px]"
         animate={{ x: [0, -30, 0], y: [0, -40, 0] }}
         transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -72,10 +73,8 @@ export default function LoginPage() {
         className="relative flex w-full max-w-sm flex-col gap-5 rounded-[2rem] vidro p-7 shadow-2xl"
       >
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="grid size-14 place-items-center rounded-2xl gradiente-destaque">
-            <ForkKnifeIcon size={28} weight="fill" aria-hidden />
-          </div>
-          <h1 className="font-display text-2xl font-bold">Entrar no painel</h1>
+          <Logo className="text-3xl" />
+          <h1 className="mt-2 font-display text-2xl font-bold">Entrar no painel</h1>
           <p className="text-sm text-(--texto-suave)">Gestores de restaurante e administradores da plataforma.</p>
         </div>
 

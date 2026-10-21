@@ -125,7 +125,7 @@ export default function RestauranteFormPage() {
       titulo={id ? "Editar restaurante" : "Novo restaurante"}
       abas={ABAS_PLATAFORMA}
       acoes={
-        <Link href="/plataforma" aria-label="Voltar para os restaurantes" className="grid size-10 place-items-center rounded-full bg-white/8 ring-1 ring-white/10">
+        <Link href="/plataforma" aria-label="Voltar para os restaurantes" className="grid size-10 place-items-center rounded-full bg-(--superficie-forte) ring-1 ring-(--borda)">
           <ArrowLeftIcon size={18} weight="bold" aria-hidden />
         </Link>
       }
@@ -143,7 +143,7 @@ export default function RestauranteFormPage() {
           // Notebook/PC: imagens e gestor à esquerda, dados do cardápio à direita.
           className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8"
         >
-          <section className="flex flex-col gap-4 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8">
+          <section className="flex flex-col gap-4 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda)">
             <Controller
               control={control}
               name="capa"
@@ -177,7 +177,7 @@ export default function RestauranteFormPage() {
             />
           </section>
 
-          <section className="flex flex-col gap-4 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8">
+          <section className="flex flex-col gap-4 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda)">
             <h2 className="font-display font-semibold">Gestor do restaurante</h2>
             {id ? (
               <p className="text-sm text-(--texto-suave)">

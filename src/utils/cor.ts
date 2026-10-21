@@ -6,7 +6,7 @@
 export const COR_REGEX = /^#[0-9a-f]{6}$/i;
 
 /** Cor padrão do cardápio (o `--destaque` do globals.css). */
-export const COR_PADRAO = "#ff6b4a";
+export const COR_PADRAO = "#ff6b24";
 
 /** Luminância relativa (WCAG 2) de um hex `#rrggbb`. */
 function luminancia(hex: string): number {
@@ -19,7 +19,7 @@ function luminancia(hex: string): number {
 
 /**
  * Texto sobre o destaque: branco, a não ser que a cor seja clara (amarelo, ocre, pastel), aí quase preto.
- * ponytail: corte em 0,4 (não no ponto de contraste igual, ~0,18) para manter o branco sobre o coral da marca.
+ * ponytail: corte em 0,4 (não no ponto de contraste igual, ~0,18) para manter o branco sobre o laranja da marca.
  */
 export function corDoTextoSobre(hex: string): string {
   return luminancia(hex) > 0.4 ? "#111114" : "#ffffff";

@@ -52,17 +52,17 @@ export default function MetricasPage() {
   return (
     <PainelShell titulo="Métricas" abas={ABAS_GESTAO}>
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-1 rounded-full bg-white/[0.05] p-1 ring-1 ring-white/8" role="group" aria-label="Período">
+        <div className="flex gap-1 rounded-full bg-(--superficie) p-1 ring-1 ring-(--borda)" role="group" aria-label="Período">
           {PERIODOS.map((periodo) => (
             <button
               key={periodo.dias}
               type="button"
               onClick={() => setDias(periodo.dias)}
               aria-pressed={dias === periodo.dias}
-              className={`relative flex-1 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${dias === periodo.dias ? "text-white" : "text-(--texto-suave)"}`}
+              className={`relative flex-1 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${dias === periodo.dias ? "text-(--texto)" : "text-(--texto-suave)"}`}
             >
               {dias === periodo.dias && (
-                <motion.span layoutId="periodo-ativo" className="absolute inset-0 rounded-full bg-white/12 ring-1 ring-white/15" />
+                <motion.span layoutId="periodo-ativo" className="absolute inset-0 rounded-full bg-(--bg-elevado) ring-1 ring-(--borda-forte)" />
               )}
               <span className="relative">{periodo.rotulo}</span>
             </button>
@@ -105,7 +105,7 @@ export default function MetricasPage() {
             tipo="QUASE_PEDIDOS"
             titulo="Quase pedidos"
             subtitulo="Curtidos e depois removidos — bons candidatos a ajuste de preço ou foto"
-            cor="var(--destaque-2)"
+            cor="var(--principal)"
             vazio="Ninguém desistiu de um prato no período."
           />
           <CartaoRanking
@@ -265,7 +265,7 @@ function Seletor<T extends string | null>({ rotulo, opcoes, valor, onChange, cla
         aria-expanded={aberto}
         aria-controls={`${id}-lista`}
         aria-label={`${rotulo}: ${opcoes[selecionado]?.nome ?? ""}`}
-        className="flex w-full items-center justify-between gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-sm ring-1 ring-white/10 transition outline-none hover:bg-white/[0.09] focus-visible:ring-2 focus-visible:ring-(--destaque)/70"
+        className="flex w-full items-center justify-between gap-2 rounded-full bg-(--bg-elevado) px-4 py-2 text-sm ring-1 ring-(--borda) transition outline-none hover:bg-(--superficie-forte) focus-visible:ring-2 focus-visible:ring-(--destaque)/70"
       >
         <span className="truncate">{opcoes[selecionado]?.nome}</span>
         <CaretDownIcon aria-hidden className={`shrink-0 text-(--texto-suave) transition-transform ${aberto ? "rotate-180" : ""}`} />
@@ -284,7 +284,7 @@ function Seletor<T extends string | null>({ rotulo, opcoes, valor, onChange, cla
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-x-0 border border-(--borda) bg-(--bg-elevado) z-20 mt-2 max-h-80 origin-top overflow-y-auto rounded-2xl p-1.5 shadow-2xl shadow-black/50 outline-none"
+            className="absolute inset-x-0 border border-(--borda) bg-(--bg-elevado) z-20 mt-2 max-h-80 origin-top overflow-y-auto rounded-2xl p-1.5 shadow-[0_20px_50px_-12px_var(--sombra)] outline-none"
           >
             {opcoes.map((opcao, indice) => (
               <li
@@ -294,7 +294,7 @@ function Seletor<T extends string | null>({ rotulo, opcoes, valor, onChange, cla
                 aria-selected={indice === selecionado}
                 onClick={() => escolher(indice)}
                 onMouseMove={() => setAtivo(indice)}
-                className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${indice === ativo ? "bg-white/[0.08]" : ""} ${indice === selecionado ? "text-(--destaque)" : indice === ativo ? "text-(--texto)" : "text-(--texto-suave)"}`}
+                className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${indice === ativo ? "bg-(--superficie-forte)" : ""} ${indice === selecionado ? "text-(--principal-forte)" : indice === ativo ? "text-(--texto)" : "text-(--texto-suave)"}`}
               >
                 <span className="truncate">{opcao.nome}</span>
                 {indice === selecionado && <CheckIcon weight="bold" aria-hidden className="shrink-0" />}
@@ -314,9 +314,9 @@ function Tile({ indice, icone, rotulo, valor }: { indice: number; icone: ReactNo
       variants={surgir}
       initial="oculto"
       animate="visivel"
-      className="flex flex-col gap-2 rounded-3xl bg-white/[0.04] p-4 ring-1 ring-white/8"
+      className="flex flex-col gap-2 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda)"
     >
-      <span className="text-lg text-(--destaque)">{icone}</span>
+      <span className="text-lg text-(--principal-forte)">{icone}</span>
       <span className="text-xs text-(--texto-suave)">{rotulo}</span>
       <span className="text-2xl font-semibold tracking-tight">{valor}</span>
     </motion.div>
@@ -331,7 +331,7 @@ function Cartao({ indice, largo, titulo, subtitulo, children }: { indice: number
       variants={surgir}
       initial="oculto"
       animate="visivel"
-      className={`rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/8 ${largo ? "lg:col-span-2" : ""}`}
+      className={`rounded-3xl bg-(--bg-elevado) p-5 ring-1 ring-(--borda) ${largo ? "lg:col-span-2" : ""}`}
     >
       <h2 className="font-display text-base font-semibold">{titulo}</h2>
       <p className="mb-4 text-xs text-(--texto-fraco)">{subtitulo}</p>

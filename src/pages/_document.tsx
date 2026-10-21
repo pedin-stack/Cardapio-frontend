@@ -4,11 +4,9 @@ export default function Document() {
   return (
     <Html lang="pt-BR">
       <Head>
-        <meta name="theme-color" content="#07070a" />
-        <meta name="color-scheme" content="dark" />
-        {/* .ico para navegadores antigos; o SVG (nítido em qualquer tamanho) tem prioridade onde é suportado. */}
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        {/* .ico para navegadores antigos; o PNG (512 px) tem prioridade onde é suportado. */}
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" href="/icone.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
       <body>

@@ -49,7 +49,7 @@ export function CampoImagem({ rotulo, dica, valor, formato, inteira, onChange, o
         whileTap={{ scale: 0.97 }}
         onClick={() => entrada.current?.click()}
         aria-label={valor ? `Trocar ${rotulo.toLowerCase()}` : `Enviar ${rotulo.toLowerCase()}`}
-        className={`relative ${moldura} overflow-hidden rounded-3xl border border-dashed border-white/20 text-(--texto-suave) transition hover:border-(--destaque)`}
+        className={`relative ${moldura} overflow-hidden rounded-3xl border border-dashed border-(--borda-forte) text-(--texto-suave) transition hover:border-(--destaque) ${inteira && valor ? "bg-[#0a1519]" : ""}`}
       >
         {enviando ? (
           <span className="absolute inset-0 grid place-items-center shimmer">

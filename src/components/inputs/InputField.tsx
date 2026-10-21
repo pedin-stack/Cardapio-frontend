@@ -14,7 +14,7 @@ type BaseProps = {
 };
 
 export const CLASSE_CAMPO =
-  "w-full rounded-2xl bg-white/[0.06] px-4 py-3 text-[15px] text-(--texto) ring-1 ring-white/10 transition outline-none placeholder:text-(--texto-fraco) focus:bg-white/[0.09] focus:ring-2 focus:ring-(--destaque)/70 aria-[invalid=true]:ring-(--perigo)/80";
+  "w-full rounded-2xl bg-(--superficie) px-4 py-3 text-[15px] text-(--texto) ring-1 ring-(--borda) transition outline-none placeholder:text-(--texto-fraco) focus:bg-(--superficie-forte) focus:ring-2 focus:ring-(--destaque)/70 aria-[invalid=true]:ring-(--perigo)/80";
 
 function Moldura({ id, label, erro, dica, wrapperClassName, children }: BaseProps & { id: string; children: ReactNode }) {
   return (

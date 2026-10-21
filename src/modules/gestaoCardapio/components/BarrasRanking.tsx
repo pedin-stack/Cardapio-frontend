@@ -43,7 +43,7 @@ export function BarrasRanking({ linhas, cor, destaqueId, vazio }: BarrasRankingP
               <span className="min-w-0 truncate text-(--texto)">{linha.rotulo}</span>
               <span className="shrink-0 font-medium text-(--texto-suave) tabular-nums">{linha.valorFormatado}</span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-r bg-white/[0.05]">
+            <div className="h-2.5 w-full overflow-hidden rounded-r bg-(--superficie-forte)">
               <motion.div
                 className="h-full rounded-r-[4px] transition-[filter] group-hover:brightness-125"
                 style={{ background: cor }}

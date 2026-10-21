@@ -95,14 +95,14 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
-            className="relative aspect-[9/12] max-h-80 w-full overflow-hidden rounded-3xl bg-black ring-1 ring-white/10 sm:w-60"
+            className="relative aspect-[9/12] max-h-80 w-full overflow-hidden rounded-3xl bg-black ring-1 ring-(--borda) sm:w-60"
           >
             {previa ? (
               <video src={previa} className="size-full object-cover" muted loop autoPlay playsInline />
             ) : video.hlsUrl ? (
               <HlsVideo src={video.hlsUrl} poster={video.posterUrl} modo="tocar" mudo className="size-full" />
             ) : (
-              <div className="grid size-full place-items-center text-(--texto-fraco)">
+              <div className="grid size-full place-items-center text-white/40">
                 <VideoCameraIcon size={36} weight="duotone" aria-hidden />
               </div>
             )}
@@ -113,7 +113,7 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
                 onChange(null);
               }}
               aria-label="Remover vídeo"
-              className="absolute top-2 right-2 grid size-9 place-items-center rounded-full bg-black/60 backdrop-blur transition hover:bg-black/80"
+              className="absolute top-2 right-2 grid size-9 place-items-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80"
             >
               <TrashIcon size={16} weight="bold" aria-hidden />
             </button>
@@ -124,7 +124,7 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
             type="button"
             whileTap={{ scale: 0.97 }}
             onClick={() => entrada.current?.click()}
-            className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-white/20 py-8 text-(--texto-suave) transition hover:border-(--destaque) hover:text-white sm:w-60"
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-(--borda-forte) py-8 text-(--texto-suave) transition hover:border-(--destaque) hover:text-(--texto) sm:w-60"
           >
             <VideoCameraIcon size={30} weight="duotone" aria-hidden />
             <span className="text-sm font-medium">Adicionar vídeo</span>

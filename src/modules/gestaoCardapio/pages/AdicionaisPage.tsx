@@ -80,7 +80,7 @@ export default function AdicionaisPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -60 }}
-                  className="flex items-center gap-2 rounded-2xl bg-white/[0.05] p-3 ring-1 ring-white/8"
+                  className="flex items-center gap-2 rounded-2xl bg-(--bg-elevado) p-3 ring-1 ring-(--borda)"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{adicional.nome}</p>
@@ -92,7 +92,7 @@ export default function AdicionaisPage() {
                     type="button"
                     onClick={() => setEditando(adicional)}
                     aria-label={`Editar ${adicional.nome}`}
-                    className="grid size-9 place-items-center rounded-full hover:bg-white/10"
+                    className="grid size-9 place-items-center rounded-full hover:bg-(--superficie-forte)"
                   >
                     <PencilSimpleIcon size={16} aria-hidden />
                   </button>
@@ -199,7 +199,7 @@ function FormularioAdicional({ adicional, onClose }: { adicional: Adicional | "n
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-sm font-medium text-(--texto-suave)">Pratos que oferecem ({selecionados.length})</legend>
           <div className="flex items-center gap-2">
-            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white/[0.06] px-4 py-2.5 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-(--destaque)/70">
+            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-(--superficie) px-4 py-2.5 ring-1 ring-(--borda) focus-within:ring-2 focus-within:ring-(--destaque)/70">
               <MagnifyingGlassIcon size={16} className="shrink-0 text-(--texto-suave)" aria-hidden />
               <span className="sr-only">Buscar prato</span>
               <input
@@ -214,12 +214,12 @@ function FormularioAdicional({ adicional, onClose }: { adicional: Adicional | "n
               type="button"
               onClick={alternarFiltrados}
               disabled={filtrados.length === 0}
-              className="shrink-0 rounded-full px-3 py-2 text-sm font-medium text-(--destaque) disabled:opacity-40"
+              className="shrink-0 rounded-full px-3 py-2 text-sm font-medium text-(--principal-forte) disabled:opacity-40"
             >
               {todosMarcados ? "Desmarcar" : "Marcar"} {busca.trim() ? "filtrados" : "todos"}
             </button>
           </div>
-          <ul className="max-h-72 divide-y divide-white/6 overflow-y-auto rounded-2xl ring-1 ring-white/8">
+          <ul className="max-h-72 divide-y divide-(--borda) overflow-y-auto rounded-2xl ring-1 ring-(--borda)">
             {loading ? (
               <li className="p-4 text-sm text-(--texto-suave)">Carregando pratos…</li>
             ) : filtrados.length === 0 ? (
@@ -227,7 +227,7 @@ function FormularioAdicional({ adicional, onClose }: { adicional: Adicional | "n
             ) : (
               filtrados.map((item) => (
                 <li key={item.id}>
-                  <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/5">
+                  <label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm hover:bg-(--superficie)">
                     <input
                       type="checkbox"
                       checked={selecionados.includes(item.id)}

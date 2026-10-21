@@ -39,7 +39,7 @@ export function CampoCor({ cor, onChange, erro }: CampoCorProps) {
           value={efetiva}
           onChange={(evento) => onChange(evento.target.value.toLowerCase())}
           aria-label="Escolher cor"
-          className="size-12 shrink-0 cursor-pointer rounded-2xl bg-transparent ring-1 ring-white/15 [&::-moz-color-swatch]:rounded-xl [&::-moz-color-swatch]:border-0 [&::-webkit-color-swatch]:rounded-xl [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-1"
+          className="size-12 shrink-0 cursor-pointer rounded-2xl bg-transparent ring-1 ring-(--borda-forte) [&::-moz-color-swatch]:rounded-xl [&::-moz-color-swatch]:border-0 [&::-webkit-color-swatch]:rounded-xl [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-1"
         />
         <input
           id={id}
@@ -57,7 +57,7 @@ export function CampoCor({ cor, onChange, erro }: CampoCorProps) {
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-(--texto-suave) ring-1 ring-white/12 transition hover:text-(--texto)"
+            className="flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-(--texto-suave) ring-1 ring-(--borda-forte) transition hover:text-(--texto)"
           >
             <ArrowCounterClockwiseIcon size={14} aria-hidden />
             Padrão
@@ -65,8 +65,8 @@ export function CampoCor({ cor, onChange, erro }: CampoCorProps) {
         )}
       </div>
 
-      {/* Prévia: as mesmas peças do cardápio, na cor escolhida. */}
-      <div className="mt-1 flex items-center gap-3 rounded-2xl bg-black/30 px-4 py-3 ring-1 ring-white/8" aria-hidden>
+      {/* Prévia: as mesmas peças do cardápio (escuro), na cor escolhida. */}
+      <div className="mt-1 flex items-center gap-3 rounded-2xl bg-[#0a1519] px-4 py-3 ring-1 ring-(--borda)" aria-hidden>
         <span
           className="rounded-full px-4 py-1.5 text-sm font-semibold"
           style={{
@@ -77,7 +77,7 @@ export function CampoCor({ cor, onChange, erro }: CampoCorProps) {
           R$ 39,90
         </span>
         <HeartIcon size={26} weight="fill" style={{ color: efetiva }} />
-        <span className="text-xs text-(--texto-fraco)">Prévia no cardápio</span>
+        <span className="text-xs text-white/60">Prévia no cardápio</span>
       </div>
 
       {erro && (

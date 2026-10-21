@@ -19,7 +19,7 @@ export function ToggleSwitch({ checked, onChange, rotulo, disabled }: ToggleSwit
       aria-label={rotulo}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition-colors disabled:opacity-50 ${checked ? "gradiente-destaque" : "bg-white/15"}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition-colors disabled:opacity-50 ${checked ? "gradiente-destaque" : "bg-(--superficie-max)"}`}
     >
       <motion.span
         layout

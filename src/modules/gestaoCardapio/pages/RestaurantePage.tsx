@@ -119,7 +119,7 @@ export default function RestaurantePage() {
       <motion.section
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-6 rounded-3xl bg-white/[0.03] p-4 ring-1 ring-white/8 lg:max-w-2xl lg:p-6"
+        className="flex flex-col gap-6 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda) lg:max-w-2xl lg:p-6"
       >
         <div>
           <h2 className="font-display text-lg font-semibold">{salvo.nome}</h2>

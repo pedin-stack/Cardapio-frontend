@@ -30,7 +30,7 @@ export default function RestaurantesPage() {
 
   return (
     <PainelShell titulo="Restaurantes" abas={ABAS_PLATAFORMA}>
-      <label className="mb-5 flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-(--destaque)/70 lg:max-w-md">
+      <label className="mb-5 flex items-center gap-2 rounded-full bg-(--bg-elevado) px-4 py-3 ring-1 ring-(--borda) focus-within:ring-2 focus-within:ring-(--destaque)/70 lg:max-w-md">
         <MagnifyingGlassIcon size={18} className="text-(--texto-fraco)" aria-hidden />
         <input
           value={busca}
@@ -61,9 +61,9 @@ export default function RestaurantesPage() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(i * 0.04, 0.3), duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden rounded-3xl bg-white/[0.04] ring-1 ring-white/8"
+                className="overflow-hidden rounded-3xl bg-(--bg-elevado) ring-1 ring-(--borda)"
               >
-                <div className="relative h-24 bg-[radial-gradient(circle_at_20%_20%,rgba(255,107,74,0.35),transparent_60%),#121218]">
+                <div className="relative h-24 bg-(--mc-grafite) bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--mc-turquesa)_35%,transparent),transparent_60%)]">
                   {restaurante.capaUrl && (
                     <Image src={restaurante.capaUrl} alt="" fill sizes="(max-width: 640px) 100vw, 380px" className="object-cover opacity-80" />
                   )}
@@ -71,7 +71,7 @@ export default function RestaurantesPage() {
                   <motion.span
                     animate={{ opacity: restaurante.ativo ? 1 : 0.9 }}
                     className={`absolute top-3 right-3 rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur ${
-                      restaurante.ativo ? "bg-(--sucesso)/20 text-(--sucesso)" : "bg-(--perigo)/20 text-(--perigo)"
+                      restaurante.ativo ? "bg-(--sucesso) text-white" : "bg-(--perigo) text-white"
                     }`}
                   >
                     {restaurante.ativo ? "● No ar" : "● Desativado"}
@@ -82,12 +82,12 @@ export default function RestaurantesPage() {
                     {restaurante.logoUrl ? (
                       <Image src={restaurante.logoUrl} alt="" fill sizes="56px" className="object-cover" />
                     ) : (
-                      <StorefrontIcon size={24} className="absolute inset-0 m-auto text-white/40" aria-hidden />
+                      <StorefrontIcon size={24} className="absolute inset-0 m-auto text-(--texto-fraco)" aria-hidden />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{restaurante.nome}</p>
-                    <Link href={`/${restaurante.slug}`} target="_blank" className="inline-flex max-w-full items-center gap-1 text-xs text-(--texto-suave) hover:text-white">
+                    <Link href={`/${restaurante.slug}`} target="_blank" className="inline-flex max-w-full items-center gap-1 text-xs text-(--texto-suave) hover:text-(--texto)">
                       <span className="truncate">/{restaurante.slug}</span>
                       <ArrowSquareOutIcon size={12} className="shrink-0" aria-hidden />
                     </Link>
@@ -100,7 +100,7 @@ export default function RestaurantesPage() {
                   <Link
                     href={`/plataforma/restaurantes/${restaurante.id}`}
                     aria-label={`Editar ${restaurante.nome}`}
-                    className="grid size-9 shrink-0 place-items-center rounded-full bg-white/8 hover:bg-white/15"
+                    className="grid size-9 shrink-0 place-items-center rounded-full bg-(--superficie-forte) hover:bg-(--superficie-max)"
                   >
                     <PencilSimpleIcon size={16} aria-hidden />
                   </Link>
@@ -122,7 +122,7 @@ export default function RestaurantesPage() {
         <Link
           href="/plataforma/restaurantes/novo"
           aria-label="Novo restaurante"
-          className="grid size-14 place-items-center rounded-full gradiente-destaque shadow-[0_12px_40px_-8px_rgba(255,107,74,0.9)] transition active:scale-90"
+          className="grid size-14 place-items-center rounded-full gradiente-destaque text-(--sobre-destaque) sombra-destaque transition active:scale-90"
         >
           <PlusIcon size={26} weight="bold" aria-hidden />
         </Link>

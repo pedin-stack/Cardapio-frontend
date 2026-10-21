@@ -1,28 +1,68 @@
 @import "tailwindcss";
 
 /*
- * Tokens do Cardápio — dark mode único (minimal UI + glassmorphism).
+ * Tokens do MenuClip. Claro (branco gelo) na landing e nos painéis; escuro grafite só no cardápio público, que
+ * marca a árvore com `.tema-escuro` (_app) — o :has() leva os tokens ao <html>, toasts e seleção sem JS.
  * Consumo: sintaxe v4 `bg-(--bg)`, `text-(--texto-suave)`, `border-(--borda)`.
  */
 :root {
-  --bg: #07070a;
-  --bg-elevado: #111117;
-  --superficie: rgb(255 255 255 / 0.06);
-  --superficie-forte: rgb(255 255 255 / 0.1);
-  --borda: rgb(255 255 255 / 0.1);
-  --borda-forte: rgb(255 255 255 / 0.18);
-  --texto: #f5f5f7;
-  --texto-suave: rgb(245 245 247 / 0.66);
-  --texto-fraco: rgb(245 245 247 / 0.42);
-  --destaque: #ff6b4a;
-  --destaque-2: #ffb36b;
-  --destaque-suave: rgb(255 107 74 / 0.16);
+  /* Paleta da marca: fixa, nunca sobrescrita (logo, selos). */
+  --mc-turquesa: #00bfcb;
+  --mc-laranja: #ff6b24;
+  --mc-grafite: #17252b;
+  --mc-gelo: #f5f5f5;
+  --mc-menta: #d9f5f1;
+
+  --bg: var(--mc-gelo);
+  --bg-elevado: #fff;
+  --superficie: rgb(23 37 43 / 0.04);
+  --superficie-forte: rgb(23 37 43 / 0.07);
+  --superficie-max: rgb(23 37 43 / 0.12);
+  --borda: rgb(23 37 43 / 0.1);
+  --borda-forte: rgb(23 37 43 / 0.18);
+  --texto: var(--mc-grafite);
+  --texto-suave: rgb(23 37 43 / 0.78);
+  --texto-fraco: rgb(23 37 43 / 0.65);
+  --destaque: var(--mc-laranja);
+  --destaque-2: #e8560f;
+  --destaque-suave: rgb(255 107 36 / 0.14);
   /* Texto sobre o destaque. O cardápio troca os quatro pela cor do restaurante (src/utils/cor.ts). */
   --sobre-destaque: #fff;
+  /* Turquesa: preenchimentos; o "forte" é para texto e ícone pequeno sobre o claro (≥ 4.5:1 no gelo e na menta). */
+  --principal: var(--mc-turquesa);
+  --principal-forte: #00727a;
+  --vidro: rgb(255 255 255 / 0.72);
+  /* Fim do texto-gradiente: grafite → laranja passa por marrom, então no claro termina no turquesa. */
+  --fim-gradiente: var(--principal-forte);
+  --vidro-claro: rgb(23 37 43 / 0.06);
+  --sombra: rgb(23 37 43 / 0.18);
+  --sucesso: #047857;
+  --perigo: #c8243c;
+  --aviso: #95600a;
+  --raio: 1.25rem;
+  color-scheme: light;
+}
+
+:root:has(.tema-escuro) {
+  --bg: #0a1519;
+  --bg-elevado: #132227;
+  --superficie: rgb(255 255 255 / 0.06);
+  --superficie-forte: rgb(255 255 255 / 0.1);
+  --superficie-max: rgb(255 255 255 / 0.16);
+  --borda: rgb(255 255 255 / 0.1);
+  --borda-forte: rgb(255 255 255 / 0.18);
+  --texto: var(--mc-gelo);
+  --texto-suave: rgb(245 245 245 / 0.66);
+  --texto-fraco: rgb(245 245 245 / 0.42);
+  --destaque-2: #ffa36b;
+  --principal-forte: var(--mc-turquesa);
+  --vidro: rgb(12 24 29 / 0.55);
+  --fim-gradiente: var(--destaque-2);
+  --vidro-claro: rgb(255 255 255 / 0.08);
+  --sombra: rgb(0 0 0 / 0.8);
   --sucesso: #3ddc97;
   --perigo: #ff5470;
   --aviso: #ffc861;
-  --raio: 1.25rem;
   color-scheme: dark;
 }
 
@@ -30,7 +70,7 @@
    raiz do _app, não no :root (sem inline o var() quebrava no :root e a fonte caía para a do sistema). */
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-fredoka), var(--font-inter), ui-sans-serif, sans-serif;
   --ease-mola: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -51,19 +91,19 @@ body {
 
 ::selection {
   background: var(--destaque);
-  color: #fff;
+  color: var(--sobre-destaque);
 }
 
 /* Vidro fosco: superfícies sobre mídia (chips, barras, sheets). */
 @utility vidro {
-  background: rgb(16 16 22 / 0.55);
+  background: var(--vidro);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   border: 1px solid var(--borda);
 }
 
 @utility vidro-claro {
-  background: rgb(255 255 255 / 0.08);
+  background: var(--vidro-claro);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   border: 1px solid var(--borda-forte);
@@ -74,10 +114,14 @@ body {
 }
 
 @utility texto-gradiente {
-  background-image: linear-gradient(135deg, #fff 30%, var(--destaque-2));
+  background-image: linear-gradient(135deg, var(--texto) 30%, var(--fim-gradiente));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+@utility sombra-destaque {
+  box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--destaque) 70%, transparent);
 }
 
 @utility sem-scrollbar {
@@ -106,9 +150,9 @@ body {
   }
 }
 
-/* Toasts no tema escuro de vidro. */
+/* Toasts de vidro no tema da página. */
 .Toastify__toast {
-  background: rgb(20 20 26 / 0.85) !important;
+  background: color-mix(in srgb, var(--bg-elevado) 90%, transparent) !important;
   backdrop-filter: blur(18px);
   border: 1px solid var(--borda);
   border-radius: 1rem !important;
