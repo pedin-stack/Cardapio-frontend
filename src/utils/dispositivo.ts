@@ -1,9 +1,40 @@
 /**
- * @description Identificador anônimo e estável do navegador (UUID v4). O backend usa como
- * `X-Device-ID`: dono das curtidas, das visualizações e chave do rate limit.
+ * @description Identificador anônimo do navegador (UUID v4). O backend usa como `X-Device-ID`: dono das curtidas,
+ * das visualizações e chave do rate limit. Ele e o que o cliente faz sem login valem 4 h desde a última mexida.
  */
 
 const CHAVE = "cardapio-dispositivo-id";
+const CHAVE_VALIDADE = "cardapio-validade";
+const VALIDADE_MS = 4 * 60 * 60 * 1000;
+
+/** Mexeu (curtiu, escolheu, seguiu sem login): o que ficou salvo vale por mais 4 h. */
+export function renovarValidade() {
+  try {
+    localStorage.setItem(CHAVE_VALIDADE, String(Date.now() + VALIDADE_MS));
+  } catch {
+    // Storage bloqueado: nada fica salvo mesmo.
+  }
+}
+
+/**
+ * Vencidas as 4 h (ou sem validade, dado de antes dela existir), o navegador esquece toda chave `cardapio-*` — de
+ * todos os restaurantes — menos a do cliente identificado, e ganha outro id: a volta no dia seguinte é outra visita.
+ * Trocar o id importa: a curtida antiga segue ativa na API, então com o mesmo id curtir de novo não contaria e
+ * descurtir desfaria o pedido da visita anterior.
+ */
+export function esquecerSeVencido() {
+  try {
+    if (Number(localStorage.getItem(CHAVE_VALIDADE)) > Date.now()) return;
+    const chaves = Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i) ?? "");
+    for (const chave of chaves) {
+      const identificado = chave.startsWith("cardapio-cliente:") && localStorage.getItem(chave) !== JSON.stringify("anonimo");
+      if (chave.startsWith("cardapio-") && !identificado) localStorage.removeItem(chave);
+    }
+    renovarValidade();
+  } catch {
+    // Storage bloqueado: nada ficou salvo.
+  }
+}
 
 /** UUID v4. `crypto.randomUUID` só existe em contexto seguro; testar o cardápio pelo IP da rede local é http. */
 export function gerarUuid(): string {

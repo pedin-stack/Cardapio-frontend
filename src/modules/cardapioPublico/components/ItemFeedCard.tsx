@@ -36,7 +36,8 @@ type ItemFeedCardProps = {
   onDeslizarAlem?: (direcao: 1 | -1) => void;
 };
 
-const CLASSE_SECAO = "relative h-svh w-full shrink-0 snap-start snap-always overflow-hidden bg-(--bg-elevado)";
+/** `isolate`: o selo e a tela cheia da mídia (z-10) ficam acima do degradê sem escapar do card. */
+const CLASSE_SECAO = "relative isolate h-svh w-full shrink-0 snap-start snap-always overflow-hidden bg-(--bg-elevado)";
 
 export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function ItemFeedCard(
   {
@@ -88,10 +89,10 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
           vizinhas={vizinhas}
           onDeslizarAlem={onDeslizarAlem}
         />
+        {/* Escurece a base para o texto ficar legível sobre qualquer foto. Aqui dentro, e não por cima do motion.div
+            (que vira contexto de empilhamento ao animar): assim os botões z-10 da mídia ficam acima dele. */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40" />
       </motion.div>
-
-      {/* Escurece a base para o texto ficar legível sobre qualquer foto. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40" />
 
       {/* Coração gigante do toque duplo. */}
       <AnimatePresence>

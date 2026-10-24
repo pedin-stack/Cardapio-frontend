@@ -1,9 +1,12 @@
 /**
  * @description Cliente identificado no cardápio (para comentar e avaliar). O navegador guarda, por restaurante, o
  * token + nome (e as estrelas que deu) ou a escolha "sem login". `exigir` abre a identificação quando preciso e
- * roda a ação pendente assim que o cliente se identifica.
+ * roda a ação pendente assim que o cliente se identifica. O "sem login" vale 4 h desde a última mexida (o modal da
+ * entrada volta depois); a identificação fica.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { esquecerSeVencido, renovarValidade } from "@/utils/dispositivo";
 
 import { identificarCliente } from "../services/cardapioPublicoService";
 import type { IdentificacaoCliente } from "../types/cardapioPublico";
@@ -33,6 +36,7 @@ function ler(slug: string): Estado {
 function gravar(slug: string, estado: Estado) {
   try {
     localStorage.setItem(chave(slug), JSON.stringify(estado));
+    renovarValidade();
   } catch {
     // Storage bloqueado: a identificação vale só até recarregar.
   }
@@ -47,6 +51,7 @@ export function useCliente(slug: string | undefined) {
 
   useEffect(() => {
     if (!slug) return;
+    esquecerSeVencido();
     setEstado(ler(slug));
     setCarregado(true);
   }, [slug]);

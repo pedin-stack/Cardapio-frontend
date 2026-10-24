@@ -2,12 +2,13 @@
  * @description Aba "Curtidos" (o carrinho do cardápio). O navegador é a fonte da verdade da UI
  * (localStorage por restaurante); a API recebe cada curtir/descurtir para as métricas. Atualização otimista
  * com rollback se a API recusar. Quantidade, especificações e adicionais escolhidos ficam só no navegador
- * (são para o garçom).
+ * (são para o garçom). Tudo some 4 h depois da última mexida (ver `esquecerSeVencido`).
  */
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
+import { esquecerSeVencido, renovarValidade } from "@/utils/dispositivo";
 
 import { curtirItem, descurtirItem } from "../services/cardapioPublicoService";
 import type { ItemPublico } from "../types/cardapioPublico";
@@ -49,6 +50,7 @@ function lerDetalhes(slug: string): Record<string, DetalheCurtido> {
 function gravar(chaveStorage: string, valor: unknown) {
   try {
     localStorage.setItem(chaveStorage, JSON.stringify(valor));
+    renovarValidade();
   } catch {
     // Storage bloqueado: a aba Curtidos vale só até recarregar.
   }
@@ -61,6 +63,7 @@ export function useCurtidos(slug: string | undefined) {
 
   useEffect(() => {
     if (!slug) return;
+    esquecerSeVencido();
     setCurtidos(ler(slug));
     setDetalhes(lerDetalhes(slug));
   }, [slug]);

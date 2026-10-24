@@ -1,6 +1,6 @@
 /**
  * @description Abertura imersiva: capa em tela cheia (o vídeo de fundo do restaurante rodando mudo, ou a foto) com
- * parallax ao rolar, logo em vidro e entrada escalonada do nome.
+ * parallax ao rolar, logo em vidro abaixo do cabeçalho e entrada escalonada do nome.
  */
 import type { RefObject } from "react";
 import Image from "next/image";
@@ -56,23 +56,27 @@ export function HeroRestaurante({ restaurante, capaReserva, videoAtivo, containe
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-(--bg)" />
 
-      <motion.div
-        style={{ opacity: opacidadeTexto }}
-        className="absolute inset-x-0 bottom-0 flex flex-col items-center px-6 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] text-center"
-      >
-        {restaurante.logoUrl && (
+      {/* Logo logo abaixo do cabeçalho fixo (safe-area + 3,75rem). */}
+      {restaurante.logoUrl && (
+        <motion.div style={{ opacity: opacidadeTexto }} className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4.5rem)] flex justify-center">
           <motion.div
             custom={0}
             variants={entrada}
             initial="oculto"
             animate="visivel"
-            className="relative mb-5 size-24 overflow-hidden rounded-[1.75rem] vidro-claro p-1.5 shadow-2xl"
+            className="relative size-24 overflow-hidden rounded-[1.75rem] vidro-claro p-1.5 shadow-2xl"
           >
             <div className="relative size-full overflow-hidden rounded-[1.4rem]">
               <Image src={restaurante.logoUrl} alt={`Logo de ${restaurante.nome}`} fill sizes="96px" className="object-cover" />
             </div>
           </motion.div>
-        )}
+        </motion.div>
+      )}
+
+      <motion.div
+        style={{ opacity: opacidadeTexto }}
+        className="absolute inset-x-0 bottom-0 flex flex-col items-center px-6 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] text-center"
+      >
         <motion.h1
           custom={1}
           variants={entrada}

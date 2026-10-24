@@ -6,10 +6,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { CopyIcon, ForkKnifeIcon, MagnifyingGlassIcon, PlayIcon, XIcon } from "@phosphor-icons/react";
+import { ForkKnifeIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 
 import { EmptyState } from "@/components/UIStates";
 
+import { SeloMidia } from "./CarrosselMidia";
 import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
 import { buscarItens } from "../utils/buscaExplorar";
 
@@ -130,7 +131,6 @@ type BlocoExplorarProps = {
 function BlocoExplorar({ item, posicao, atraso, onAbrir }: BlocoExplorarProps) {
   const capa = item.imagens[0] ?? item.videoPosterUrl;
   const temVideo = Boolean(item.videoHlsUrl);
-  const variasMidias = item.imagens.length + (temVideo ? 1 : 0) > 1;
 
   return (
     <motion.li
@@ -151,11 +151,7 @@ function BlocoExplorar({ item, posicao, atraso, onAbrir }: BlocoExplorarProps) {
             <ForkKnifeIcon size={32} weight="thin" className="text-white/40" aria-hidden />
           </div>
         )}
-        {(temVideo || variasMidias) && (
-          <span className="absolute top-1.5 right-1.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" aria-hidden>
-            {temVideo ? <PlayIcon size={16} weight="fill" /> : <CopyIcon size={16} weight="fill" />}
-          </span>
-        )}
+        {(temVideo || item.imagens.length > 0) && <SeloMidia video={temVideo} className="top-1.5 right-1.5 text-sm" />}
         <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2 pt-6 pb-1.5 text-left text-xs leading-tight font-semibold">
           <span className="line-clamp-2">{item.nome}</span>
         </span>

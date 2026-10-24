@@ -3,11 +3,12 @@
  * CSS scroll-snap nativo (sem lib) + indicadores animados. Toque simples/duplo vem do pai. No feed, deslizar além
  * da última mídia (ou antes da primeira) troca de categoria.
  * ponytail: só toque; no desktop a troca de categoria fica com os chips.
+ * Cada mídia leva o selo de foto/vídeo no canto superior direito; o vídeo, o botão de tela cheia no inferior.
  */
 import { useRef, useState, type TouchEvent } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { CaretLeftIcon, CaretRightIcon, ForkKnifeIcon } from "@phosphor-icons/react";
+import { CameraIcon, CaretLeftIcon, CaretRightIcon, ForkKnifeIcon, VideoCameraIcon } from "@phosphor-icons/react";
 
 import { HlsVideo } from "@/components/video/HlsVideo";
 import type { ModoVideo } from "@/components/video/janelaVideos";
@@ -29,6 +30,15 @@ type CarrosselMidiaProps = {
 
 /** Distância (px) que o dedo precisa passar da ponta para trocar de categoria. */
 const LIMIAR_DESLIZE = 70;
+
+/** Selo semitransparente de foto ou vídeo. Posição e tamanho (text-*) vêm de quem usa. */
+export function SeloMidia({ video, className }: { video: boolean; className: string }) {
+  return (
+    <span className={`pointer-events-none absolute grid place-items-center rounded-full bg-black/35 p-1.5 text-white/85 backdrop-blur-sm ${className}`} aria-hidden>
+      {video ? <VideoCameraIcon size="1em" weight="fill" /> : <CameraIcon size="1em" weight="fill" />}
+    </span>
+  );
+}
 
 export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arredondado, vizinhas, onDeslizarAlem }: CarrosselMidiaProps) {
   const trilho = useRef<HTMLDivElement>(null);
@@ -73,6 +83,9 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
     if (el) setSlide(Math.round(el.scrollLeft / el.clientWidth));
   };
 
+  // No feed, o selo fica na altura dos indicadores (abaixo dos chips).
+  const posicaoSelo = `z-10 ${arredondado ? "top-3 right-3" : "top-[calc(env(safe-area-inset-top)+7rem)] right-3"} text-base`;
+
   if (total === 0) {
     return (
       <div className="grid size-full place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_srgb,var(--destaque)_35%,transparent),transparent_60%),radial-gradient(circle_at_70%_80%,color-mix(in_srgb,var(--destaque-2)_25%,transparent),transparent_55%)]">
@@ -106,7 +119,10 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
               modo={slide === 0 || modoVideo !== "tocar" ? modoVideo : "pausado"}
               mudo={mudo}
               className="size-full"
+              // No feed, entre a barra de navegação e o trilho de ações.
+              telaCheia={arredondado ? "right-3 bottom-3" : "right-5 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)]"}
             />
+            <SeloMidia video className={posicaoSelo} />
           </div>
         )}
         {item.imagens.map((url, indice) => (
@@ -120,6 +136,7 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
               priority={prioridade && indice === 0 && !temVideo}
               draggable={false}
             />
+            <SeloMidia video={false} className={posicaoSelo} />
           </div>
         ))}
       </div>

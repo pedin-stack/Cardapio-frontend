@@ -11,6 +11,7 @@ import { ForkKnifeIcon } from "@phosphor-icons/react";
 import { HlsVideo } from "@/components/video/HlsVideo";
 import { formatarMoeda } from "@/utils/formatarMoeda";
 
+import { SeloMidia } from "./CarrosselMidia";
 import { ChipsCategorias } from "./ChipsCategorias";
 import { MediaEstrelas } from "./Estrelas";
 import type { CategoriaPublica, ItemPublico, RestaurantePublico } from "../types/cardapioPublico";
@@ -138,7 +139,10 @@ function LinhaItem({ item, onAbrir }: { item: ItemPublico; onAbrir: (item: ItemP
         </div>
         <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-white/5">
           {foto ? (
-            <Image src={foto} alt="" fill sizes="96px" className="object-cover" />
+            <>
+              <Image src={foto} alt="" fill sizes="96px" className="object-cover" />
+              <SeloMidia video={Boolean(item.videoHlsUrl)} className="top-1 right-1 text-xs" />
+            </>
           ) : (
             <ForkKnifeIcon size={28} weight="thin" className="absolute inset-0 m-auto text-white/40" aria-hidden />
           )}
