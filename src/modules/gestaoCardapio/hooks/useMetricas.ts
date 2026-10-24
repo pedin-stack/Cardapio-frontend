@@ -8,26 +8,12 @@ import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 
 import { buscarMetricas, buscarRanking } from "../services/metricaService";
 import type { OrdemRanking, TipoRanking } from "../types/gestaoCardapio";
+import { ultimosDias, type Intervalo } from "../utils/periodos";
 
 const POR_PAGINA_RANKING = 10;
 
-/** AAAA-MM-DD no fuso do navegador (o back interpreta como data local do restaurante). */
-function dataLocal(data: Date): string {
-  const mes = String(data.getMonth() + 1).padStart(2, "0");
-  const dia = String(data.getDate()).padStart(2, "0");
-  return `${data.getFullYear()}-${mes}-${dia}`;
-}
-
-/** Últimos `dias` dias, hoje incluso. */
-function periodo(dias: number) {
-  const fim = new Date();
-  const inicio = new Date(fim);
-  inicio.setDate(fim.getDate() - (dias - 1));
-  return { inicio: dataLocal(inicio), fim: dataLocal(fim) };
-}
-
-export function useMetricas(dias: number, itemId: string | null) {
-  const params = { ...periodo(dias), itemId: itemId ?? undefined };
+export function useMetricas(intervalo: Intervalo, itemId: string | null = null) {
+  const params = { inicio: intervalo.inicio, fim: intervalo.fim, itemId: itemId ?? undefined };
 
   const query = useQuery({
     queryKey: ["metricas", params],
@@ -47,7 +33,7 @@ export function useMetricas(dias: number, itemId: string | null) {
 export function useRankingMetrica(filtro: { tipo: TipoRanking; dias: number; categoriaId: string | null; ordem: OrdemRanking; page: number }) {
   const params = {
     tipo: filtro.tipo,
-    ...periodo(filtro.dias),
+    ...ultimosDias(filtro.dias),
     categoriaId: filtro.categoriaId ?? undefined,
     ordem: filtro.ordem,
     page: filtro.page,
