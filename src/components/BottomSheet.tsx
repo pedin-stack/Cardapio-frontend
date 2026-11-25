@@ -24,17 +24,17 @@ export function BottomSheet({ isOpen, onClose, titulo, tituloOculto, children }:
     if (!isOpen) return;
     const anterior = document.activeElement as HTMLElement | null;
     fechar.current?.focus();
-    const aoTeclar = (evento: KeyboardEvent) => {
+    const handleTeclar = (evento: KeyboardEvent) => {
       if (evento.key === "Escape") onClose();
     };
-    document.addEventListener("keydown", aoTeclar);
+    document.addEventListener("keydown", handleTeclar);
     return () => {
-      document.removeEventListener("keydown", aoTeclar);
+      document.removeEventListener("keydown", handleTeclar);
       anterior?.focus?.();
     };
   }, [isOpen, onClose]);
 
-  const aoSoltar = (_: unknown, info: PanInfo) => {
+  const handleSoltar = (_: unknown, info: PanInfo) => {
     if (info.offset.y > 120 || info.velocity.y > 600) onClose();
   };
 
@@ -65,7 +65,7 @@ export function BottomSheet({ isOpen, onClose, titulo, tituloOculto, children }:
             dragListener={false}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
-            onDragEnd={aoSoltar}
+            onDragEnd={handleSoltar}
           >
             <div
               onPointerDown={(evento) => controles.start(evento)}

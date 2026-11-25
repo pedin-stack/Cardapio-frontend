@@ -27,7 +27,7 @@ export function useRastreioVisualizacao(slug: string | undefined, itemEmFoco: st
       const lote = agregador.current.drenar(performance.now());
       if (lote.length > 0) enviarVisualizacoes(slug, lote).catch(() => undefined);
     };
-    const aoMudarVisibilidade = () => {
+    const handleMudarVisibilidade = () => {
       if (document.visibilityState === "hidden") {
         agregador.current.focar(null, performance.now());
         enviar();
@@ -37,11 +37,11 @@ export function useRastreioVisualizacao(slug: string | undefined, itemEmFoco: st
     };
 
     const intervalo = window.setInterval(enviar, INTERVALO_ENVIO_MS);
-    document.addEventListener("visibilitychange", aoMudarVisibilidade);
+    document.addEventListener("visibilitychange", handleMudarVisibilidade);
     window.addEventListener("pagehide", enviar);
     return () => {
       window.clearInterval(intervalo);
-      document.removeEventListener("visibilitychange", aoMudarVisibilidade);
+      document.removeEventListener("visibilitychange", handleMudarVisibilidade);
       window.removeEventListener("pagehide", enviar);
       enviar();
     };

@@ -15,7 +15,7 @@ import { InputField } from "@/components/inputs/InputField";
 import { PainelShell } from "@/components/PainelShell";
 import { Paginacao } from "@/components/Paginacao";
 import { EmptyState, ErrorState, LoadingState } from "@/components/UIStates";
-import { normalizar } from "@/modules/cardapioPublico/utils/buscaExplorar";
+import { normalizar } from "@/utils/texto";
 import { formatarMoeda } from "@/utils/formatarMoeda";
 
 import { useAdicionaisPagina, useAdicionalAcoes } from "../hooks/useAdicionais";
@@ -36,7 +36,7 @@ export default function AdicionaisPage() {
     if (totalPages > 0 && page >= totalPages) setPage(totalPages - 1);
   }, [page, totalPages]);
 
-  const aoExcluir = () => {
+  const handleExcluir = () => {
     if (!excluindo) return;
     excluir.mutate(excluindo.id, {
       onSuccess: () => {
@@ -121,7 +121,7 @@ export default function AdicionaisPage() {
         rotuloConfirmar="Excluir adicional"
         perigo
         loading={excluir.isPending}
-        onConfirm={aoExcluir}
+        onConfirm={handleExcluir}
         onClose={() => setExcluindo(null)}
       />
     </PainelShell>

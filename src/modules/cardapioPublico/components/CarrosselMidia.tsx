@@ -60,16 +60,16 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
     return null;
   };
 
-  const aoIniciarToque = (e: TouchEvent) => {
+  const handleIniciarToque = (e: TouchEvent) => {
     gesto.current = onDeslizarAlem ? { x: e.touches[0].clientX, y: e.touches[0].clientY, slide } : null;
   };
-  const aoMoverToque = (e: TouchEvent) => {
+  const handleMoverToque = (e: TouchEvent) => {
     if (!gesto.current) return;
     const direcao = destinoDo(gesto.current, e.touches[0]);
     const progresso = Math.min(1, Math.abs(e.touches[0].clientX - gesto.current.x) / LIMIAR_DESLIZE);
     setPuxando(direcao ? { direcao, progresso } : null);
   };
-  const aoSoltarToque = (e: TouchEvent) => {
+  const handleSoltarToque = (e: TouchEvent) => {
     const inicio = gesto.current;
     gesto.current = null;
     setPuxando(null);
@@ -78,7 +78,7 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
     if (direcao && Math.abs(e.changedTouches[0].clientX - inicio.x) >= LIMIAR_DESLIZE) onDeslizarAlem(direcao);
   };
 
-  const aoRolar = () => {
+  const handleRolar = () => {
     const el = trilho.current;
     if (el) setSlide(Math.round(el.scrollLeft / el.clientWidth));
   };
@@ -98,11 +98,11 @@ export function CarrosselMidia({ item, modoVideo, mudo, prioridade, onToque, arr
     <div className={`relative size-full ${arredondado ? "overflow-hidden rounded-(--raio)" : ""}`}>
       <div
         ref={trilho}
-        onScroll={aoRolar}
+        onScroll={handleRolar}
         onClick={onToque}
-        onTouchStart={aoIniciarToque}
-        onTouchMove={aoMoverToque}
-        onTouchEnd={aoSoltarToque}
+        onTouchStart={handleIniciarToque}
+        onTouchMove={handleMoverToque}
+        onTouchEnd={handleSoltarToque}
         onTouchCancel={() => setPuxando(null)}
         // Nas pontas, o deslize para fora do carrossel não é rolagem do navegador (só o nosso toque): senão o Chrome
         // o trata como "voltar"/"avançar" no histórico e tira o cliente do cardápio. pan-right = dedo para a esquerda.

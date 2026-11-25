@@ -3,12 +3,9 @@
  * adicionais pagos (somam no preço), ingredientes, a avaliação do cliente, comentários, compartilhar e curtir.
  */
 import { useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
 import { ShareFatIcon } from "@phosphor-icons/react";
 
-import { mensagemSeguraDeErro, statusDoErro } from "@/api/mensagemErro";
 import { BottomSheet } from "@/components/BottomSheet";
 import { formatarMoeda } from "@/utils/formatarMoeda";
 
@@ -16,9 +13,9 @@ import { BotaoCurtir } from "./BotaoCurtir";
 import { CarrosselMidia } from "./CarrosselMidia";
 import { EscolhaEstrelas, MediaEstrelas } from "./Estrelas";
 import { SecaoComentarios } from "./SecaoComentarios";
+import { useAvaliarItem } from "../hooks/useAvaliarItem";
 import type { ClienteCardapio } from "../hooks/useCliente";
 import { precoUnitario } from "../hooks/useCurtidos";
-import { avaliarItem } from "../services/cardapioPublicoService";
 import type { ItemPublico } from "../types/cardapioPublico";
 
 type DetalheItemSheetProps = {
@@ -64,7 +61,7 @@ export function DetalheItemSheet({
   onCompartilhar,
   onClose,
 }: DetalheItemSheetProps) {
-  const queryClient = useQueryClient();
+  const avaliarItem = useAvaliarItem(slug, cliente);
   const secaoComentarios = useRef<HTMLElement>(null);
 
   // Espera a folha subir antes de rolar até os comentários (só ao abrir: o item recarregado não rola de novo).
@@ -76,22 +73,7 @@ export function DetalheItemSheet({
   }, [itemId, focarComentarios]);
 
   const avaliar = (estrelas: number) => {
-    if (!item) return;
-    const itemId = item.id;
-    const enviar = async (token: string) => {
-      const anterior = cliente.minhaAvaliacao(itemId);
-      cliente.lembrarAvaliacao(itemId, estrelas);
-      try {
-        await avaliarItem(slug, itemId, estrelas, token);
-        // A média do card vem no cardápio.
-        queryClient.invalidateQueries({ queryKey: ["cardapio-publico", slug] });
-      } catch (erro) {
-        cliente.lembrarAvaliacao(itemId, anterior);
-        if (statusDoErro(erro) === 401) cliente.esquecer(enviar);
-        else toast.error(mensagemSeguraDeErro(erro, "Não foi possível salvar sua avaliação."));
-      }
-    };
-    cliente.exigir(enviar);
+    if (item) avaliarItem(item.id, estrelas);
   };
 
   return (

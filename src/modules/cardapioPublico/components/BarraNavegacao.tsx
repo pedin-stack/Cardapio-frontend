@@ -26,7 +26,7 @@ export function BarraNavegacao({ aba, totalCurtidos, onTrocar }: BarraNavegacaoP
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 28 }}
-      className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 mx-auto flex w-[calc(100%-2rem)] max-w-[22rem] gap-1 rounded-full vidro p-1.5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.8)]"
+      className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 mx-auto flex w-[calc(100%-2rem)] max-w-[22rem] gap-1 rounded-full vidro p-1.5 shadow-[0_20px_60px_-10px_var(--sombra)]"
     >
       {abas.map(({ id, rotulo, Icone }) => {
         const ativa = aba === id;

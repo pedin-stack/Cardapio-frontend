@@ -12,6 +12,10 @@
   --mc-grafite: #17252b;
   --mc-gelo: #f5f5f5;
   --mc-menta: #d9f5f1;
+  /* Fundo do cardápio escuro, também usado nas prévias dele no painel. */
+  --mc-noite: #0a1519;
+  /* Capa do cardápio sem foto nem vídeo. */
+  --fundo-sem-capa: #0b0b10;
 
   --bg: var(--mc-gelo);
   --bg-elevado: #fff;
@@ -44,7 +48,7 @@
 }
 
 :root:has(.tema-escuro) {
-  --bg: #0a1519;
+  --bg: var(--mc-noite);
   --bg-elevado: #132227;
   --superficie: rgb(255 255 255 / 0.06);
   --superficie-forte: rgb(255 255 255 / 0.1);

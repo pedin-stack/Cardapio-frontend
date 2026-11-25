@@ -3,28 +3,24 @@
  * e redes sociais (WhatsApp e Instagram).
  */
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
 import { ArrowSquareOutIcon, FloppyDiskIcon } from "@phosphor-icons/react";
 
 import type { ArquivoEnviado } from "@/actions/uploadService";
-import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 import { Botao } from "@/components/Botao";
 import { CampoCor } from "@/components/inputs/CampoCor";
+import { CampoImagem } from "@/components/inputs/CampoImagem";
 import { InputField } from "@/components/inputs/InputField";
 import { PainelShell } from "@/components/PainelShell";
 import { ErrorState, LoadingState } from "@/components/UIStates";
-import { CampoImagem } from "@/modules/plataforma/components/CampoImagem";
 import { mascararTelefone, soDigitos } from "@/utils/mascaras";
 
 import { CampoVideo } from "../components/CampoVideo";
+import { useMeuRestaurante } from "../hooks/useMeuRestaurante";
 import { ABAS_GESTAO } from "../navegacao";
 import type { ItemCardapioForm } from "../schemas/itemCardapio.schema";
-import { atualizarAparencia, buscarMeuRestaurante } from "../services/meuRestauranteService";
 import type { AparenciaPayload, MeuRestaurante } from "../types/gestaoCardapio";
 
-const CHAVE_MEU_RESTAURANTE = ["meu-restaurante"] as const;
 /** Espelha o `@Pattern` do instagram no `RestauranteAparenciaRequestDTO`. */
 const INSTAGRAM = /^[A-Za-z0-9._]{1,30}$/;
 
@@ -61,14 +57,7 @@ function paraPayload(form: FormAparencia): AparenciaPayload {
 const mesmoPayload = (a: FormAparencia, b: FormAparencia) => JSON.stringify(paraPayload(a)) === JSON.stringify(paraPayload(b));
 
 export default function RestaurantePage() {
-  const queryClient = useQueryClient();
-  const query = useQuery({
-    queryKey: CHAVE_MEU_RESTAURANTE,
-    queryFn: buscarMeuRestaurante,
-    // Acompanha o vídeo da capa até ficar pronto.
-    refetchInterval: (q) => (q.state.data?.video.status === "PROCESSANDO" ? 5000 : false),
-  });
-  const salvo = query.data;
+  const { restaurante: salvo, erro, refetch, salvando, salvar } = useMeuRestaurante();
   const [form, setForm] = useState<FormAparencia | null>(null);
   const [enviando, setEnviando] = useState(0);
 
@@ -77,26 +66,13 @@ export default function RestaurantePage() {
     if (salvo) setForm((atual) => (atual && !mesmoPayload(atual, doRestaurante(salvo)) ? atual : doRestaurante(salvo)));
   }, [salvo]);
 
-  const salvar = useMutation({
-    mutationFn: atualizarAparencia,
-    onSuccess: (restaurante) => {
-      queryClient.setQueryData(CHAVE_MEU_RESTAURANTE, restaurante);
-      toast.success(
-        restaurante.video.status === "PROCESSANDO"
-          ? "Salvo! O vídeo da capa está sendo processado."
-          : "Aparência salva. O cardápio atualiza em até 30 segundos.",
-      );
-    },
-    onError: (erro) => toast.error(mensagemSeguraDeErro(erro, "Não foi possível salvar a aparência.")),
-  });
-
   const mudar = (parcial: Partial<FormAparencia>) => setForm((atual) => (atual ? { ...atual, ...parcial } : atual));
   const contarEnvio = (ativo: boolean) => setEnviando((n) => n + (ativo ? 1 : -1));
 
-  if (query.error) {
+  if (erro) {
     return (
       <PainelShell titulo="Restaurante" abas={ABAS_GESTAO}>
-        <ErrorState mensagem={mensagemSeguraDeErro(query.error, "Não foi possível carregar o restaurante.")} onRetry={() => query.refetch()} />
+        <ErrorState mensagem={erro} onRetry={() => refetch()} />
       </PainelShell>
     );
   }
@@ -184,9 +160,9 @@ export default function RestaurantePage() {
           </a>
           <Botao
             icone={<FloppyDiskIcon size={18} weight="bold" aria-hidden />}
-            loading={salvar.isPending}
+            loading={salvando}
             disabled={!alterado || enviando > 0 || Boolean(erroWhatsapp || erroInstagram)}
-            onClick={() => salvar.mutate(paraPayload(form))}
+            onClick={() => salvar(paraPayload(form))}
           >
             {enviando > 0 ? "Aguardando envio…" : "Salvar"}
           </Botao>

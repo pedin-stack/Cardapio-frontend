@@ -62,7 +62,7 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
   const [coracao, setCoracao] = useState(0);
   const temVideo = Boolean(item.videoHlsUrl);
 
-  const aoToque = useToqueDuplo(
+  const handleToque = useToqueDuplo(
     () => (temVideo ? onAlternarSom() : onAbrirDetalhe()),
     () => {
       setCoracao((n) => n + 1);
@@ -85,7 +85,7 @@ export const ItemFeedCard = forwardRef<HTMLElement, ItemFeedCardProps>(function 
           modoVideo={modoVideo}
           mudo={mudo}
           prioridade={indice === 0}
-          onToque={aoToque}
+          onToque={handleToque}
           vizinhas={vizinhas}
           onDeslizarAlem={onDeslizarAlem}
         />
