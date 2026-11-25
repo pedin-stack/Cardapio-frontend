@@ -21,24 +21,24 @@ import { AbaCurtidos } from "../components/AbaCurtidos";
 import { AbaExplorar } from "../components/AbaExplorar";
 import { BarraNavegacao, type Aba } from "../components/BarraNavegacao";
 import { CabecalhoCardapio, type ModoCardapio } from "../components/CabecalhoCardapio";
+import { CardapioSkeleton } from "../components/CardapioSkeleton";
 import { ChipsCategorias } from "../components/ChipsCategorias";
 import { DetalheItemSheet } from "../components/DetalheItemSheet";
 import { HeroRestaurante } from "../components/HeroRestaurante";
 import { IdentificacaoSheet } from "../components/IdentificacaoSheet";
 import { ItemFeedCard } from "../components/ItemFeedCard";
-import { ListaCardapio, type SecaoLista } from "../components/ListaCardapio";
+import { ListaCardapio } from "../components/ListaCardapio";
 import { useCardapioPublico } from "../hooks/useCardapioPublico";
 import { useCliente } from "../hooks/useCliente";
 import { useCurtidos } from "../hooks/useCurtidos";
+import { useFeedCardapio } from "../hooks/useFeedCardapio";
 import { useRastreioVisualizacao } from "../hooks/useRastreioVisualizacao";
-import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
+import type { ItemPublico } from "../types/cardapioPublico";
 import { categoriaVizinha } from "../utils/categoriaVizinha";
 import { compartilharItem } from "../utils/compartilhar";
 
 /** Índice "virtual" do hero no feed: nenhum card ativo. */
 const INDICE_HERO = -1;
-/** Categoria virtual com os mais curtidos (a API manda os ids já ordenados). */
-const MAIS_PEDIDOS: CategoriaPublica = { id: "mais-pedidos", nome: "Mais pedidos", ordem: -1 };
 /** Cards montados antes e depois do ativo; os outros ficam só com a casca (o feed contínuo passa de 200 pratos). */
 const JANELA_MONTADA = 2;
 
@@ -60,56 +60,9 @@ export default function CardapioPublicoPage() {
   const feed = useRef<HTMLElement>(null);
   const secoes = useRef(new Map<number, HTMLElement>());
 
-  // "Mais pedidos" só existe quando há curtidas; vem antes das categorias reais (é onde o feed abre).
-  const categoriasFeed = useMemo(
-    () => (cardapio?.maisPedidos.length ? [MAIS_PEDIDOS, ...cardapio.categorias] : (cardapio?.categorias ?? [])),
-    [cardapio],
-  );
-  const itensDa = useCallback(
-    (categoriaId: string | null) => {
-      const todos = cardapio?.itens ?? [];
-      if (categoriaId === MAIS_PEDIDOS.id) {
-        const porId = new Map(todos.map((item) => [item.id, item]));
-        return (cardapio?.maisPedidos ?? []).map((id) => porId.get(id)).filter((item): item is ItemPublico => Boolean(item));
-      }
-      // Sem categorias no restaurante, mostra tudo.
-      return todos.filter((item) => !categoriaId || item.categoriaIds.includes(categoriaId));
-    },
-    [cardapio],
-  );
-  // Lista e feed mostram as categorias em sequência, na ordem dos chips ("Mais pedidos" primeiro).
-  const secoesCardapio = useMemo<SecaoLista[]>(
-    () =>
-      categoriasFeed.length === 0
-        ? [{ categoria: { id: "cardapio", nome: "Cardápio", ordem: 0 }, itens: cardapio?.itens ?? [] }]
-        : categoriasFeed.map((c) => ({ categoria: c, itens: itensDa(c.id) })).filter((secao) => secao.itens.length > 0),
-    [categoriasFeed, cardapio, itensDa],
-  );
-  const categoriasDasSecoes = useMemo(() => secoesCardapio.map((secao) => secao.categoria), [secoesCardapio]);
-  /** Feed contínuo: as seções uma atrás da outra (o mesmo prato pode estar em "Mais pedidos" e na categoria dele). */
-  const feedItens = useMemo(
-    () => secoesCardapio.flatMap(({ categoria, itens }) => itens.map((item) => ({ item, categoriaId: categoria.id }))),
-    [secoesCardapio],
-  );
-  /** Categoria → índice do primeiro prato dela no feed (destino do chip e do deslize lateral). */
-  const primeiroIndice = useMemo(() => {
-    const mapa = new Map<string, number>();
-    feedItens.forEach(({ categoriaId }, indice) => {
-      if (!mapa.has(categoriaId)) mapa.set(categoriaId, indice);
-    });
-    return mapa;
-  }, [feedItens]);
+  const { categoriasFeed, categoriasDasSecoes, secoesCardapio, feedItens, primeiroIndice, nomesDe } = useFeedCardapio(cardapio);
   // A categoria ativa é a do prato na tela (na capa, a primeira): os chips acompanham a rolagem, como na lista.
   const categoriaAtiva = feedItens[indiceAtivo]?.categoriaId ?? categoriasDasSecoes[0]?.id ?? null;
-  const nomeCategoria = useMemo(
-    () => new Map((cardapio?.categorias ?? []).map((c) => [c.id, c.nome])),
-    [cardapio],
-  );
-  const nomesDe = useCallback(
-    (item: ItemPublico) => item.categoriaIds.map((id) => nomeCategoria.get(id)).filter((n): n is string => Boolean(n)),
-    [nomeCategoria],
-  );
-
   // Card ativo = o que ocupa ≥ 60 % da tela (o hero conta como índice -1).
   useEffect(() => {
     const raiz = feed.current;
@@ -336,15 +289,5 @@ export default function CardapioPublicoPage() {
         </div>
       </div>
     </>
-  );
-}
-
-function CardapioSkeleton() {
-  return (
-    <div className="relative mx-auto flex h-svh max-w-[480px] flex-col justify-end gap-3 px-6 pb-32" role="status" aria-label="Carregando cardápio">
-      <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4.5rem)] mx-auto size-24 rounded-[1.75rem] shimmer" />
-      <div className="mx-auto h-10 w-3/4 rounded-full shimmer" />
-      <div className="mx-auto h-4 w-1/2 rounded-full shimmer" />
-    </div>
   );
 }
