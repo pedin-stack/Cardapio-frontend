@@ -49,7 +49,7 @@ export function ListaCardapio({ restaurante, capaReserva, secoes, videoAtivo, on
   }, [secoes]);
 
   // No máximo uma conta por quadro, por mais eventos de rolagem que cheguem.
-  const aoRolar = () => {
+  const handleRolar = () => {
     cancelAnimationFrame(quadro.current);
     quadro.current = requestAnimationFrame(atualizarAtiva);
   };
@@ -67,7 +67,7 @@ export function ListaCardapio({ restaurante, capaReserva, secoes, videoAtivo, on
 
   return (
     <motion.div
-      onScroll={aoRolar}
+      onScroll={handleRolar}
       aria-label="Cardápio em lista"
       className="sem-scrollbar fixed inset-0 z-10 mx-auto max-w-[480px] overflow-y-auto overscroll-y-contain bg-(--bg) pb-32"
       initial={{ opacity: 0 }}

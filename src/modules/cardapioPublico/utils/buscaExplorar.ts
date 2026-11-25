@@ -2,11 +2,9 @@
  * @description Busca da aba Explorar: o que casa pelo nome vem primeiro, depois pela categoria e por último
  * pelos ingredientes. Dentro de cada camada vale a ordem do cardápio. Sem acento e sem caixa.
  */
-import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
+import { normalizar } from "@/utils/texto";
 
-export function normalizar(texto: string): string {
-  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-}
+import type { CategoriaPublica, ItemPublico } from "../types/cardapioPublico";
 
 export function buscarItens(itens: ItemPublico[], categorias: CategoriaPublica[], termo: string): ItemPublico[] {
   const busca = normalizar(termo);

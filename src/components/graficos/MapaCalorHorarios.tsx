@@ -7,7 +7,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
-import type { Metricas } from "../types/gestaoCardapio";
+import type { CurtidaPorHorario } from "@/types/metricas";
 
 const DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 const DIAS_CURTOS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
@@ -30,7 +30,7 @@ function corDaCelula(total: number, maximo: number): string {
 
 const descrever = (c: Celula) => `${DIAS[c.dia - 1]}, ${c.hora}h: ${c.total} ${c.total === 1 ? "curtida" : "curtidas"}`;
 
-export function MapaCalorHorarios({ dados }: { dados: Metricas["curtidasPorHorario"] }) {
+export function MapaCalorHorarios({ dados }: { dados: CurtidaPorHorario[] }) {
   const [focada, setFocada] = useState<Celula | null>(null);
   const [tabela, setTabela] = useState(false);
 

@@ -22,7 +22,7 @@ export default function RestaurantesPage() {
   const { alternarStatus } = useRestauranteAcoes();
   const [desativando, setDesativando] = useState<Restaurante | null>(null);
 
-  const aoAlternar = (restaurante: Restaurante, ativo: boolean) => {
+  const handleAlternar = (restaurante: Restaurante, ativo: boolean) => {
     // Desativar tira o cardápio do ar na hora: pede confirmação. Reativar é imediato.
     if (!ativo) setDesativando(restaurante);
     else alternarStatus.mutate({ id: restaurante.id, ativo: true });
@@ -94,7 +94,7 @@ export default function RestaurantesPage() {
                   </div>
                   <ToggleSwitch
                     checked={restaurante.ativo}
-                    onChange={(ativo) => aoAlternar(restaurante, ativo)}
+                    onChange={(ativo) => handleAlternar(restaurante, ativo)}
                     rotulo={`${restaurante.ativo ? "Desativar" : "Ativar"} ${restaurante.nome}`}
                   />
                   <Link

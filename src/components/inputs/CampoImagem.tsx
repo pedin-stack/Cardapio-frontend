@@ -26,7 +26,7 @@ export function CampoImagem({ rotulo, dica, valor, formato, inteira, onChange, o
   const [enviando, setEnviando] = useState(false);
   const moldura = formato === "quadrado" ? "aspect-square w-28" : "aspect-[16/10] w-full";
 
-  const aoSelecionar = async (arquivo: File | undefined) => {
+  const handleSelecionar = async (arquivo: File | undefined) => {
     if (entrada.current) entrada.current.value = "";
     if (!arquivo) return;
     setEnviando(true);
@@ -79,7 +79,7 @@ export function CampoImagem({ rotulo, dica, valor, formato, inteira, onChange, o
           </button>
         )}
       </div>
-      <input ref={entrada} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(evento) => aoSelecionar(evento.target.files?.[0])} />
+      <input ref={entrada} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(evento) => handleSelecionar(evento.target.files?.[0])} />
     </div>
   );
 }

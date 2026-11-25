@@ -15,11 +15,11 @@ import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 import { Botao } from "@/components/Botao";
 import { ConfirmacaoSheet } from "@/components/ConfirmacaoSheet";
 import { CampoCor } from "@/components/inputs/CampoCor";
+import { CampoImagem } from "@/components/inputs/CampoImagem";
 import { InputField, TextareaField } from "@/components/inputs/InputField";
 import { PainelShell } from "@/components/PainelShell";
 import { ErrorState, LoadingState } from "@/components/UIStates";
 
-import { CampoImagem } from "../components/CampoImagem";
 import { useRestaurante, useRestauranteAcoes } from "../hooks/useRestaurantes";
 import { ABAS_PLATAFORMA } from "../navegacao";
 import { gerarSlug, restauranteCriarSchema, restauranteEditarSchema, type RestauranteForm } from "../schemas/restaurante.schema";
@@ -86,7 +86,7 @@ export default function RestauranteFormPage() {
 
   const contarEnvio = (ativo: boolean) => setEnviando((n) => n + (ativo ? 1 : -1));
 
-  const aoSalvar = async (form: RestauranteForm) => {
+  const handleSalvar = async (form: RestauranteForm) => {
     const comum = {
       nome: form.nome.trim(),
       slug: form.slug,
@@ -109,7 +109,7 @@ export default function RestauranteFormPage() {
     }
   };
 
-  const aoExcluir = async () => {
+  const handleExcluir = async () => {
     if (!id) return;
     try {
       await excluir.mutateAsync(id);
@@ -136,7 +136,7 @@ export default function RestauranteFormPage() {
         <ErrorState mensagem={erro} onRetry={() => refetch()} />
       ) : (
         <motion.form
-          onSubmit={handleSubmit(aoSalvar)}
+          onSubmit={handleSubmit(handleSalvar)}
           noValidate
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -227,7 +227,7 @@ export default function RestauranteFormPage() {
         rotuloConfirmar="Excluir definitivamente"
         perigo
         loading={excluir.isPending}
-        onConfirm={aoExcluir}
+        onConfirm={handleExcluir}
         onClose={() => setConfirmarExclusao(false)}
       />
     </PainelShell>

@@ -47,15 +47,15 @@ export function useCategoriaAcoes() {
     queryClient.invalidateQueries({ queryKey: CHAVE_CATEGORIAS });
     queryClient.invalidateQueries({ queryKey: ["itens-cardapio"] });
   };
-  const aoFalhar = (erro: unknown) => toast.error(mensagemSeguraDeErro(erro, "Não foi possível salvar a categoria."));
+  const handleFalhar = (erro: unknown) => toast.error(mensagemSeguraDeErro(erro, "Não foi possível salvar a categoria."));
 
-  const criar = useMutation({ mutationFn: criarCategoria, onSuccess: invalidar, onError: aoFalhar });
+  const criar = useMutation({ mutationFn: criarCategoria, onSuccess: invalidar, onError: handleFalhar });
   const atualizar = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: CategoriaPayload }) => atualizarCategoria(id, payload),
     onSuccess: invalidar,
-    onError: aoFalhar,
+    onError: handleFalhar,
   });
-  const excluir = useMutation({ mutationFn: excluirCategoria, onSuccess: invalidar, onError: aoFalhar });
+  const excluir = useMutation({ mutationFn: excluirCategoria, onSuccess: invalidar, onError: handleFalhar });
 
   return { criar, atualizar, excluir };
 }

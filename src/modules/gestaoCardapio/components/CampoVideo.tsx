@@ -35,7 +35,7 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
     if (previa) URL.revokeObjectURL(previa);
   }, [previa]);
 
-  const aoSelecionar = async (arquivo: File | undefined) => {
+  const handleSelecionar = async (arquivo: File | undefined) => {
     if (entrada.current) entrada.current.value = "";
     if (!arquivo) return;
     if (!TIPOS_ACEITOS.includes(arquivo.type)) {
@@ -135,7 +135,7 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
         )}
       </AnimatePresence>
 
-      <input ref={entrada} type="file" accept={TIPOS_ACEITOS.join(",")} hidden onChange={(evento) => aoSelecionar(evento.target.files?.[0])} />
+      <input ref={entrada} type="file" accept={TIPOS_ACEITOS.join(",")} hidden onChange={(evento) => handleSelecionar(evento.target.files?.[0])} />
     </div>
   );
 }

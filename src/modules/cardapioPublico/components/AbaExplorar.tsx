@@ -43,7 +43,7 @@ export function AbaExplorar({ itens, categorias, onAbrir }: AbaExplorarProps) {
   }, [termo]);
 
   // Só a rolagem do cliente pede mais: um observador no fim dispararia sozinho sempre que 9 não enchem a tela.
-  const aoRolar = useCallback(() => {
+  const handleRolar = useCallback(() => {
     const el = rolagem.current;
     if (el && temMais && el.scrollTop + el.clientHeight >= el.scrollHeight - PERTO_DO_FIM) setVisiveis((v) => v + LOTE);
   }, [temMais]);
@@ -83,7 +83,7 @@ export function AbaExplorar({ itens, categorias, onAbrir }: AbaExplorarProps) {
         </label>
       </header>
 
-      <div ref={rolagem} onScroll={aoRolar} className="sem-scrollbar flex-1 overflow-y-auto pb-32">
+      <div ref={rolagem} onScroll={handleRolar} className="sem-scrollbar flex-1 overflow-y-auto pb-32">
         {resultado.length === 0 ? (
           <EmptyState
             icone={<MagnifyingGlassIcon size={48} weight="duotone" aria-hidden />}

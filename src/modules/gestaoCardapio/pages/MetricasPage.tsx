@@ -12,9 +12,9 @@ import { CaretDownIcon, CheckIcon, ClockIcon, EyeIcon, HeartBreakIcon, HeartIcon
 import { PainelShell } from "@/components/PainelShell";
 import { Paginacao } from "@/components/Paginacao";
 import { ErrorState, LoadingState } from "@/components/UIStates";
+import { BarrasRanking } from "@/components/graficos/BarrasRanking";
+import { MapaCalorHorarios } from "@/components/graficos/MapaCalorHorarios";
 
-import { BarrasRanking } from "../components/BarrasRanking";
-import { MapaCalorHorarios } from "../components/MapaCalorHorarios";
 import { useCategorias } from "../hooks/useCategorias";
 import { useItensCardapio } from "../hooks/useItensCardapio";
 import { useMetricas, useRankingMetrica } from "../hooks/useMetricas";

@@ -102,16 +102,16 @@ export function HlsVideo({ src, poster, modo, mudo, className, telaCheia }: HlsV
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !telaCheia) return;
-    const aoTrocar = () => {
+    const handleTrocar = () => {
       const cheia = document.fullscreenElement === video;
       video.controls = cheia;
       if (!cheia) video.muted = mudo;
     };
-    video.addEventListener("fullscreenchange", aoTrocar);
-    video.addEventListener("webkitendfullscreen", aoTrocar);
+    video.addEventListener("fullscreenchange", handleTrocar);
+    video.addEventListener("webkitendfullscreen", handleTrocar);
     return () => {
-      video.removeEventListener("fullscreenchange", aoTrocar);
-      video.removeEventListener("webkitendfullscreen", aoTrocar);
+      video.removeEventListener("fullscreenchange", handleTrocar);
+      video.removeEventListener("webkitendfullscreen", handleTrocar);
     };
   }, [telaCheia, mudo]);
 

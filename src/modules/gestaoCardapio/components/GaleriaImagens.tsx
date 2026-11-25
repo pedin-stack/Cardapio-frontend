@@ -27,7 +27,7 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
   const [enviando, setEnviando] = useState(0);
   const vagas = MAXIMO_IMAGENS - imagens.length - enviando;
 
-  const aoSelecionar = async (arquivos: FileList | null) => {
+  const handleSelecionar = async (arquivos: FileList | null) => {
     const selecionados = Array.from(arquivos ?? []).filter((arquivo) => TIPOS_ACEITOS.includes(arquivo.type));
     if (entrada.current) entrada.current.value = "";
     if (selecionados.length === 0) return;
@@ -119,7 +119,7 @@ export function GaleriaImagens({ imagens, onChange, onEnviando }: GaleriaImagens
         accept={TIPOS_ACEITOS.join(",")}
         multiple
         hidden
-        onChange={(evento) => aoSelecionar(evento.target.files)}
+        onChange={(evento) => handleSelecionar(evento.target.files)}
       />
     </div>
   );

@@ -114,7 +114,7 @@ function CurtidoLinha({ item, indice, quantidade, escolhas, adicionais, onDefini
     ...item.adicionais.filter((a) => adicionais.includes(a.id)).map((a) => `+ ${a.nome}`),
   ].join(" · ");
 
-  const aoSoltar = (_: unknown, info: PanInfo) => {
+  const handleSoltar = (_: unknown, info: PanInfo) => {
     if (info.offset.x < -110 || info.velocity.x < -700) onRemover(item.id);
   };
 
@@ -130,7 +130,7 @@ function CurtidoLinha({ item, indice, quantidade, escolhas, adicionais, onDefini
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0.7, right: 0 }}
-        onDragEnd={aoSoltar}
+        onDragEnd={handleSoltar}
         className="flex items-center gap-3 rounded-2xl vidro-claro p-2.5 pr-3"
       >
         <button

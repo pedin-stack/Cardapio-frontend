@@ -37,8 +37,8 @@ import {
 } from "@phosphor-icons/react";
 
 import { Logo } from "@/components/Logo";
-import { BarrasRanking, type LinhaRanking } from "@/modules/gestaoCardapio/components/BarrasRanking";
-import { MapaCalorHorarios } from "@/modules/gestaoCardapio/components/MapaCalorHorarios";
+import { BarrasRanking, type LinhaRanking } from "@/components/graficos/BarrasRanking";
+import { MapaCalorHorarios } from "@/components/graficos/MapaCalorHorarios";
 
 const SLUG_DEMO = "casa-jatoba";
 const URL_DEMO = `/${SLUG_DEMO}`;

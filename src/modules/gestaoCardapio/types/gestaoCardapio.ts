@@ -1,6 +1,7 @@
 /**
  * @description Espelhos dos DTOs do gestor (backend: modules/cardapio/{categoria,itemcardapio,metrica}).
  */
+import type { CurtidaPorHorario } from "@/types/metricas";
 
 /** `CategoriaResponseDTO`. */
 export type Categoria = {
@@ -124,8 +125,7 @@ export type Metricas = {
     curtidas: number;
     quasePedidos: number;
   };
-  /** diaSemana ISO: 1 = segunda … 7 = domingo. */
-  curtidasPorHorario: { diaSemana: number; hora: number; total: number }[];
+  curtidasPorHorario: CurtidaPorHorario[];
 };
 
 export type TipoRanking = "CURTIDOS" | "QUASE_PEDIDOS" | "TEMPO";

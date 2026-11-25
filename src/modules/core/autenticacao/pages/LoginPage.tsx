@@ -36,7 +36,7 @@ export default function LoginPage() {
     if (!loading && usuario) router.replace(destinoSeguro(router.query.redirect) ?? rotaInicial(usuario));
   }, [loading, usuario, router]);
 
-  const aoEnviar = async (dados: LoginForm) => {
+  const handleEnviar = async (dados: LoginForm) => {
     setErro(null);
     try {
       const sessao = await login(dados);
@@ -65,7 +65,7 @@ export default function LoginPage() {
       />
 
       <motion.form
-        onSubmit={handleSubmit(aoEnviar)}
+        onSubmit={handleSubmit(handleEnviar)}
         noValidate
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}

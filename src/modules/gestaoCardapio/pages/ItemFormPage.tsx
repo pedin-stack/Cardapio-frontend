@@ -104,7 +104,7 @@ export default function ItemFormPage() {
 
   const contarEnvio = (ativo: boolean) => setEnviandoMidia((n) => n + (ativo ? 1 : -1));
 
-  const aoSalvar = async (form: ItemCardapioForm) => {
+  const handleSalvar = async (form: ItemCardapioForm) => {
     try {
       await salvar.mutateAsync({ id, payload: paraPayload(form) });
       toast.success(form.video && !form.video.hlsUrl ? "Item salvo! O vídeo está sendo processado." : "Item salvo!");
@@ -114,7 +114,7 @@ export default function ItemFormPage() {
     }
   };
 
-  const aoExcluir = async () => {
+  const handleExcluir = async () => {
     if (!id) return;
     try {
       await excluir.mutateAsync(id);
@@ -141,7 +141,7 @@ export default function ItemFormPage() {
         <ErrorState mensagem={erro} onRetry={() => refetch()} />
       ) : (
         // Notebook/PC: mídia fixa na coluna da esquerda, campos na da direita.
-        <form onSubmit={handleSubmit(aoSalvar)} noValidate className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
+        <form onSubmit={handleSubmit(handleSalvar)} noValidate className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
           <motion.section
             custom={0}
             variants={secao}
@@ -260,7 +260,7 @@ export default function ItemFormPage() {
         rotuloConfirmar="Excluir item"
         perigo
         loading={excluir.isPending}
-        onConfirm={aoExcluir}
+        onConfirm={handleExcluir}
         onClose={() => setConfirmarExclusao(false)}
       />
     </PainelShell>

@@ -12,10 +12,10 @@ import type { ArquivoEnviado } from "@/actions/uploadService";
 import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 import { Botao } from "@/components/Botao";
 import { CampoCor } from "@/components/inputs/CampoCor";
+import { CampoImagem } from "@/components/inputs/CampoImagem";
 import { InputField } from "@/components/inputs/InputField";
 import { PainelShell } from "@/components/PainelShell";
 import { ErrorState, LoadingState } from "@/components/UIStates";
-import { CampoImagem } from "@/modules/plataforma/components/CampoImagem";
 import { mascararTelefone, soDigitos } from "@/utils/mascaras";
 
 import { CampoVideo } from "../components/CampoVideo";
