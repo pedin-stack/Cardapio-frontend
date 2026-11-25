@@ -2,16 +2,15 @@
  * @description Vídeo curto (1 por item, ou o fundo da capa do restaurante). Valida tipo, tamanho e duração no navegador, envia o original
  * ao storage e mostra o status da transcodificação HLS (o back corta em chunks de 2 s em 480p/720p).
  */
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
 import { TrashIcon, UploadSimpleIcon, VideoCameraIcon } from "@phosphor-icons/react";
 
-import { DURACAO_MAXIMA_VIDEO_S, TAMANHO_MAXIMO_VIDEO_MB, enviarArquivo, lerDuracaoVideo } from "@/actions/uploadService";
-import { mensagemSeguraDeErro } from "@/api/mensagemErro";
+import { DURACAO_MAXIMA_VIDEO_S, TAMANHO_MAXIMO_VIDEO_MB } from "@/actions/uploadService";
 import { HlsVideo } from "@/components/video/HlsVideo";
 
 import { StatusVideoBadge } from "./StatusVideoBadge";
+import { TIPOS_VIDEO_ACEITOS, useVideoUpload } from "../hooks/useVideoUpload";
 import type { ItemCardapioForm } from "../schemas/itemCardapio.schema";
 import type { StatusVideo } from "../types/gestaoCardapio";
 
@@ -24,45 +23,13 @@ type CampoVideoProps = {
   onEnviando: (enviando: boolean) => void;
 };
 
-const TIPOS_ACEITOS = ["video/mp4", "video/quicktime", "video/webm"];
-
 export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnviando }: CampoVideoProps) {
   const entrada = useRef<HTMLInputElement>(null);
-  const [previa, setPrevia] = useState<string | null>(null);
-  const [enviando, setEnviando] = useState(false);
+  const { previa, enviando, enviar, descartarPrevia } = useVideoUpload(onChange, onEnviando);
 
-  useEffect(() => () => {
-    if (previa) URL.revokeObjectURL(previa);
-  }, [previa]);
-
-  const handleSelecionar = async (arquivo: File | undefined) => {
+  const handleSelecionar = (arquivo: File | undefined) => {
     if (entrada.current) entrada.current.value = "";
-    if (!arquivo) return;
-    if (!TIPOS_ACEITOS.includes(arquivo.type)) {
-      toast.error("Use um vídeo MP4, MOV ou WebM.");
-      return;
-    }
-    if (arquivo.size > TAMANHO_MAXIMO_VIDEO_MB * 1024 * 1024) {
-      toast.error(`O vídeo deve ter até ${TAMANHO_MAXIMO_VIDEO_MB} MB.`);
-      return;
-    }
-    try {
-      if ((await lerDuracaoVideo(arquivo)) > DURACAO_MAXIMA_VIDEO_S) {
-        toast.error(`O vídeo deve ter até ${DURACAO_MAXIMA_VIDEO_S} segundos.`);
-        return;
-      }
-      setEnviando(true);
-      onEnviando(true);
-      const enviado = await enviarArquivo(arquivo);
-      // enviado.url já é a prévia local (blob:) do arquivo.
-      setPrevia(enviado.url);
-      onChange({ caminho: enviado.caminho, url: enviado.url });
-    } catch (erro) {
-      toast.error(mensagemSeguraDeErro(erro, "Não foi possível enviar o vídeo."));
-    } finally {
-      setEnviando(false);
-      onEnviando(false);
-    }
+    if (arquivo) enviar(arquivo);
   };
 
   const novo = Boolean(previa);
@@ -109,7 +76,7 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
             <button
               type="button"
               onClick={() => {
-                setPrevia(null);
+                descartarPrevia();
                 onChange(null);
               }}
               aria-label="Remover vídeo"
@@ -135,7 +102,7 @@ export function CampoVideo({ rotulo = "Vídeo", video, status, onChange, onEnvia
         )}
       </AnimatePresence>
 
-      <input ref={entrada} type="file" accept={TIPOS_ACEITOS.join(",")} hidden onChange={(evento) => handleSelecionar(evento.target.files?.[0])} />
+      <input ref={entrada} type="file" accept={TIPOS_VIDEO_ACEITOS.join(",")} hidden onChange={(evento) => handleSelecionar(evento.target.files?.[0])} />
     </div>
   );
 }

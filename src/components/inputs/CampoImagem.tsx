@@ -1,14 +1,13 @@
 /**
  * @description Uma imagem (logo ou capa) com envio assinado e prévia.
  */
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
 import { CircleNotchIcon, ImageIcon, XIcon } from "@phosphor-icons/react";
 
-import { comprimirImagem, ehPreviaLocal, enviarArquivo, type ArquivoEnviado } from "@/actions/uploadService";
-import { mensagemSeguraDeErro } from "@/api/mensagemErro";
+import { ehPreviaLocal, type ArquivoEnviado } from "@/actions/uploadService";
+import { useImagemUpload } from "@/hooks/useImagemUpload";
 
 type CampoImagemProps = {
   rotulo: string;
@@ -23,22 +22,12 @@ type CampoImagemProps = {
 
 export function CampoImagem({ rotulo, dica, valor, formato, inteira, onChange, onEnviando }: CampoImagemProps) {
   const entrada = useRef<HTMLInputElement>(null);
-  const [enviando, setEnviando] = useState(false);
+  const { enviando, enviar } = useImagemUpload(onChange, onEnviando);
   const moldura = formato === "quadrado" ? "aspect-square w-28" : "aspect-[16/10] w-full";
 
-  const handleSelecionar = async (arquivo: File | undefined) => {
+  const handleSelecionar = (arquivo: File | undefined) => {
     if (entrada.current) entrada.current.value = "";
-    if (!arquivo) return;
-    setEnviando(true);
-    onEnviando(true);
-    try {
-      onChange(await enviarArquivo(await comprimirImagem(arquivo)));
-    } catch (erro) {
-      toast.error(mensagemSeguraDeErro(erro, "Não foi possível enviar a imagem."));
-    } finally {
-      setEnviando(false);
-      onEnviando(false);
-    }
+    if (arquivo) enviar(arquivo);
   };
 
   return (

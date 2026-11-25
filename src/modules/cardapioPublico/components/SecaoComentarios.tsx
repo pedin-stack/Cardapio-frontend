@@ -3,15 +3,11 @@
  * para comentar, que pede a identificação a quem ainda não se identificou.
  */
 import { forwardRef, useState, type FormEvent } from "react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
 import { ChatCircleIcon, CircleNotchIcon, PaperPlaneRightIcon } from "@phosphor-icons/react";
 
-import { mensagemSeguraDeErro, statusDoErro } from "@/api/mensagemErro";
-
 import type { ClienteCardapio } from "../hooks/useCliente";
-import { comentarItem, listarComentarios } from "../services/cardapioPublicoService";
+import { useComentarios } from "../hooks/useComentarios";
 
 type SecaoComentariosProps = {
   slug: string;
@@ -25,39 +21,16 @@ const MAXIMO_CARACTERES = 500;
 const quando = (iso: string) => new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 
 export const SecaoComentarios = forwardRef<HTMLElement, SecaoComentariosProps>(function SecaoComentarios({ slug, itemId, cliente }, ref) {
-  const queryClient = useQueryClient();
   const [texto, setTexto] = useState("");
-  const chave = ["comentarios", slug, itemId];
+  const { comentarios, loading, erro, temMais, carregandoMais, carregarMais, publicando, publicar } = useComentarios(slug, itemId, cliente, () =>
+    setTexto(""),
+  );
 
-  const query = useInfiniteQuery({
-    queryKey: chave,
-    queryFn: ({ pageParam }) => listarComentarios(slug, itemId, pageParam),
-    initialPageParam: 0,
-    getNextPageParam: (ultima) => (ultima.number + 1 < ultima.totalPages ? ultima.number + 1 : undefined),
-  });
-
-  const comentar = useMutation({
-    mutationFn: ({ token, mensagem }: { token: string; mensagem: string }) => comentarItem(slug, itemId, mensagem, token),
-    onSuccess: () => {
-      setTexto("");
-      queryClient.invalidateQueries({ queryKey: chave });
-      // A contagem do card vem no cardápio.
-      queryClient.invalidateQueries({ queryKey: ["cardapio-publico", slug] });
-    },
-    onError: (erro, { mensagem }) => {
-      // Token recusado (cadastro apagado, outro restaurante): identifica de novo e publica o mesmo texto.
-      if (statusDoErro(erro) === 401) cliente.esquecer((token) => comentar.mutate({ token, mensagem }));
-      else toast.error(mensagemSeguraDeErro(erro, "Não foi possível publicar o comentário."));
-    },
-  });
-
-  const enviar = (evento: FormEvent) => {
+  const handleEnviar = (evento: FormEvent) => {
     evento.preventDefault();
     const mensagem = texto.trim();
-    if (mensagem) cliente.exigir((token) => comentar.mutate({ token, mensagem }));
+    if (mensagem) publicar(mensagem);
   };
-
-  const comentarios = query.data?.pages.flatMap((pagina) => pagina.content) ?? [];
 
   return (
     <section ref={ref} aria-labelledby={`comentarios-${itemId}`} className="flex scroll-mt-4 flex-col gap-3">
@@ -65,7 +38,7 @@ export const SecaoComentarios = forwardRef<HTMLElement, SecaoComentariosProps>(f
         Comentários
       </h4>
 
-      <form onSubmit={enviar} className="flex items-end gap-2">
+      <form onSubmit={handleEnviar} className="flex items-end gap-2">
         <label className="flex-1">
           <span className="sr-only">Seu comentário</span>
           <textarea
@@ -80,17 +53,17 @@ export const SecaoComentarios = forwardRef<HTMLElement, SecaoComentariosProps>(f
         <motion.button
           type="submit"
           whileTap={{ scale: 0.85 }}
-          disabled={!texto.trim() || comentar.isPending}
+          disabled={!texto.trim() || publicando}
           aria-label="Publicar comentário"
           className="mb-1 grid size-11 shrink-0 place-items-center rounded-full gradiente-destaque text-(--sobre-destaque) disabled:opacity-40"
         >
-          {comentar.isPending ? <CircleNotchIcon size={18} className="animate-spin" aria-hidden /> : <PaperPlaneRightIcon size={18} weight="fill" aria-hidden />}
+          {publicando ? <CircleNotchIcon size={18} className="animate-spin" aria-hidden /> : <PaperPlaneRightIcon size={18} weight="fill" aria-hidden />}
         </motion.button>
       </form>
 
-      {query.isPending ? (
+      {loading ? (
         <div className="h-16 rounded-2xl shimmer" role="status" aria-label="Carregando comentários" />
-      ) : query.isError ? (
+      ) : erro ? (
         <p className="text-sm text-(--texto-suave)">Não foi possível carregar os comentários.</p>
       ) : comentarios.length === 0 ? (
         <p className="flex items-center gap-2 text-sm text-(--texto-suave)">
@@ -118,14 +91,14 @@ export const SecaoComentarios = forwardRef<HTMLElement, SecaoComentariosProps>(f
         </ul>
       )}
 
-      {query.hasNextPage && (
+      {temMais && (
         <button
           type="button"
-          onClick={() => query.fetchNextPage()}
-          disabled={query.isFetchingNextPage}
+          onClick={carregarMais}
+          disabled={carregandoMais}
           className="self-center rounded-full px-4 py-2 text-sm font-medium text-(--destaque) disabled:opacity-50"
         >
-          {query.isFetchingNextPage ? "Carregando…" : "Ver mais comentários"}
+          {carregandoMais ? "Carregando…" : "Ver mais comentários"}
         </button>
       )}
     </section>

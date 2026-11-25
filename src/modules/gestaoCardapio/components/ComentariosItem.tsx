@@ -2,41 +2,21 @@
  * @description Comentários que os clientes deixaram no item (os mais novos primeiro), com "apagar" para moderar.
  */
 import { useState } from "react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
 import { ChatCircleIcon, TrashIcon } from "@phosphor-icons/react";
 
-import { mensagemSeguraDeErro } from "@/api/mensagemErro";
 import { ConfirmacaoSheet } from "@/components/ConfirmacaoSheet";
 
-import { excluirComentario, listarComentariosItem } from "../services/itemCardapioService";
+import { useComentariosItem } from "../hooks/useComentariosItem";
 import type { ComentarioItem } from "../types/gestaoCardapio";
 
 const quando = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
 export function ComentariosItem({ itemId }: { itemId: string }) {
-  const queryClient = useQueryClient();
-  const [apagando, setApagando] = useState<ComentarioItem | null>(null);
-  const chave = ["comentarios-item", itemId];
-
-  const query = useInfiniteQuery({
-    queryKey: chave,
-    queryFn: ({ pageParam }) => listarComentariosItem(itemId, pageParam),
-    initialPageParam: 0,
-    getNextPageParam: (ultima) => (ultima.number + 1 < ultima.totalPages ? ultima.number + 1 : undefined),
-  });
-  const apagar = useMutation({
-    mutationFn: excluirComentario,
-    onSuccess: () => {
-      toast.success("Comentário apagado.");
-      setApagando(null);
-      queryClient.invalidateQueries({ queryKey: chave });
-    },
-    onError: (e) => toast.error(mensagemSeguraDeErro(e, "Não foi possível apagar o comentário.")),
-  });
-
-  const comentarios = query.data?.pages.flatMap((pagina) => pagina.content) ?? [];
+  const [selecionado, setSelecionado] = useState<ComentarioItem | null>(null);
+  const { comentarios, loading, erro, temMais, carregandoMais, carregarMais, apagando, apagar } = useComentariosItem(itemId, () =>
+    setSelecionado(null),
+  );
 
   return (
     <section aria-labelledby="comentarios-item" className="mt-8 flex flex-col gap-3 rounded-3xl bg-(--bg-elevado) p-4 ring-1 ring-(--borda) lg:p-6">
@@ -44,10 +24,10 @@ export function ComentariosItem({ itemId }: { itemId: string }) {
         Comentários dos clientes
       </h2>
 
-      {query.isPending ? (
+      {loading ? (
         <div className="h-16 rounded-2xl shimmer" role="status" aria-label="Carregando comentários" />
-      ) : query.isError ? (
-        <p className="text-sm text-(--texto-suave)">{mensagemSeguraDeErro(query.error, "Não foi possível carregar os comentários.")}</p>
+      ) : erro ? (
+        <p className="text-sm text-(--texto-suave)">{erro}</p>
       ) : comentarios.length === 0 ? (
         <p className="flex items-center gap-2 text-sm text-(--texto-suave)">
           <ChatCircleIcon size={18} aria-hidden /> Ninguém comentou este prato ainda.
@@ -71,7 +51,7 @@ export function ComentariosItem({ itemId }: { itemId: string }) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setApagando(comentario)}
+                  onClick={() => setSelecionado(comentario)}
                   aria-label={`Apagar comentário de ${comentario.autor}`}
                   className="grid size-9 shrink-0 place-items-center rounded-full text-(--perigo) hover:bg-(--perigo)/10"
                 >
@@ -83,26 +63,26 @@ export function ComentariosItem({ itemId }: { itemId: string }) {
         </ul>
       )}
 
-      {query.hasNextPage && (
+      {temMais && (
         <button
           type="button"
-          onClick={() => query.fetchNextPage()}
-          disabled={query.isFetchingNextPage}
+          onClick={carregarMais}
+          disabled={carregandoMais}
           className="self-start rounded-full px-3 py-2 text-sm font-medium text-(--principal-forte) disabled:opacity-50"
         >
-          {query.isFetchingNextPage ? "Carregando…" : "Ver mais comentários"}
+          {carregandoMais ? "Carregando…" : "Ver mais comentários"}
         </button>
       )}
 
       <ConfirmacaoSheet
-        isOpen={Boolean(apagando)}
+        isOpen={Boolean(selecionado)}
         titulo="Apagar este comentário?"
         descricao="Ele some do cardápio. Não dá para desfazer."
         rotuloConfirmar="Apagar comentário"
         perigo
-        loading={apagar.isPending}
-        onConfirm={() => apagando && apagar.mutate(apagando.id)}
-        onClose={() => setApagando(null)}
+        loading={apagando}
+        onConfirm={() => selecionado && apagar(selecionado.id)}
+        onClose={() => setSelecionado(null)}
       />
     </section>
   );
