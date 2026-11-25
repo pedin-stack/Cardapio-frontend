@@ -66,7 +66,7 @@ export function CampoCor({ cor, onChange, erro }: CampoCorProps) {
       </div>
 
       {/* Prévia: as mesmas peças do cardápio (escuro), na cor escolhida. */}
-      <div className="mt-1 flex items-center gap-3 rounded-2xl bg-[#0a1519] px-4 py-3 ring-1 ring-(--borda)" aria-hidden>
+      <div className="mt-1 flex items-center gap-3 rounded-2xl bg-(--mc-noite) px-4 py-3 ring-1 ring-(--borda)" aria-hidden>
         <span
           className="rounded-full px-4 py-1.5 text-sm font-semibold"
           style={{

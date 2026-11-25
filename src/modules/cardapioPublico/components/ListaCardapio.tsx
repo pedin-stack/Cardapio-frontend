@@ -87,7 +87,7 @@ export function ListaCardapio({ restaurante, capaReserva, secoes, videoAtivo, on
         ) : capa ? (
           <Image src={capa} alt="" fill priority sizes="(max-width: 480px) 100vw, 480px" className="object-cover" />
         ) : (
-          <div className="size-full bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--destaque)_55%,transparent),transparent_55%),#0b0b10]" />
+          <div className="size-full bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--destaque)_55%,transparent),transparent_55%),var(--fundo-sem-capa)]" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-(--bg)" />
         <div className="absolute inset-x-0 bottom-0 px-5 pb-3">
